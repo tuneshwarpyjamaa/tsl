@@ -87,9 +87,13 @@ export default function Navbar() {
     <header className="border-b border-gray-300 overflow-x-hidden">
       <div className="container mx-auto px-4">
         {/* Top bar */}
-        <div className="flex items-center justify-between py-3">
-          <div className="flex items-center gap-4">
-            <button className="focus:outline-none md:hidden" onClick={handleMenuClick}>
+        <div className="relative flex items-center justify-between py-3">
+          <div className="flex-1 flex items-center">
+            <button 
+              className="focus:outline-none p-2 -ml-2" 
+              onClick={handleMenuClick}
+              aria-label="Menu"
+            >
               <MenuIcon />
             </button>
             <form onSubmit={handleSearchSubmit} className="hidden md:block flex-1 max-w-md mx-4">
@@ -110,12 +114,12 @@ export default function Navbar() {
             </form>
           </div>
 
-          <Link href="/" className="text-2xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider hover:text-gray-800 transition-colors">
+          <Link href="/" className="absolute left-1/2 transform -translate-x-1/2 text-2xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider hover:text-gray-800 transition-colors">
             <span className="hidden md:inline">The Mandate Wire</span>
             <span className="md:hidden">TMW</span>
           </Link>
 
-          <div className="flex items-center gap-2 md:gap-4 relative user-menu-container">
+          <div className="flex-1 flex items-center justify-end relative user-menu-container">
             {isAuthenticated ? (
               <>
                 <div className="mr-8">
@@ -143,7 +147,11 @@ export default function Navbar() {
               <>
                 <Link href="/register" className="bg-black text-white px-4 py-2 text-sm font-bold hidden md:block">Register</Link>
                 <Link href="/login" className="px-4 py-2 text-sm font-bold border border-gray-400 hidden md:block">Sign In</Link>
-                <button className="focus:outline-none md:hidden" onClick={handleUserIconClick}>
+                <button 
+                  className="focus:outline-none p-2 -mr-1" 
+                  onClick={handleUserIconClick}
+                  aria-label="User menu"
+                >
                   <UserIcon />
                 </button>
                 {isUserMenuOpen && (

@@ -1,28 +1,72 @@
-// components/SocialShare.js
-import { Facebook, Twitter, Linkedin } from 'lucide-react';
+import { Share2, Twitter, Facebook, Linkedin } from 'lucide-react';
 
 const SocialShare = ({ url, title }) => {
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
 
-  const shareLinks = {
-    twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+  const shareLinks = [
+    {
+      name: 'Twitter',
+      url: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+      icon: <Twitter className="w-5 h-5" />,
+      color: 'hover:bg-blue-400/10 hover:text-blue-500',
+      label: 'Share on Twitter'
+    },
+    {
+      name: 'Facebook',
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      icon: <Facebook className="w-5 h-5" />,
+      color: 'hover:bg-blue-600/10 hover:text-blue-600',
+      label: 'Share on Facebook'
+    },
+    {
+      name: 'LinkedIn',
+      url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+      icon: <Linkedin className="w-5 h-5" />,
+      color: 'hover:bg-blue-700/10 hover:text-blue-700',
+      label: 'Share on LinkedIn'
+    }
+  ];
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title,
+          url: url,
+        });
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    }
   };
 
   return (
-    <div className="flex items-center space-x-4">
-      <span className="text-sm font-semibold">Share:</span>
-      <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-500">
-        <Twitter size={20} />
-      </a>
-      <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-600">
-        <Facebook size={20} />
-      </a>
-      <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-700">
-        <Linkedin size={20} />
-      </a>
+    <div className="flex items-center gap-3">
+      <span className="text-sm font-medium text-gray-500">Share:</span>
+      <div className="flex items-center gap-2">
+        {shareLinks.map((social) => (
+          <a
+            key={social.name}
+            href={social.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`p-2 rounded-full transition-colors duration-200 ${social.color} text-gray-600`}
+            aria-label={social.label}
+          >
+            {social.icon}
+          </a>
+        ))}
+        {navigator.share && (
+          <button
+            onClick={handleNativeShare}
+            className="p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 text-gray-600"
+            aria-label="Share via native share dialog"
+          >
+            <Share2 className="w-5 h-5" />
+          </button>
+        )}
+      </div>
     </div>
   );
 };
