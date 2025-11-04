@@ -61,7 +61,7 @@ export default function PostPage() {
   const publishedDate = new Date(post.createdAt).toISOString();
 
   return (
-    <>
+    <div className="overflow-x-hidden">
       <Head>
         <title>{post.title} | TMW Blog</title>
         <meta name="description" content={postDescription} />
@@ -105,8 +105,8 @@ export default function PostPage() {
           }}
         />
       </Head>
-      <div className="max-w-7xl mx-auto px-4 grid grid-cols-12 gap-8">
-        <article className="col-span-12 md:col-span-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
+        <article className="col-span-12 md:col-span-8 w-full overflow-hidden">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
           <div className="flex justify-between items-center text-sm text-gray-600 mb-8 border-b pb-4">
         <div>
@@ -123,9 +123,25 @@ export default function PostPage() {
         <SocialShare url={postUrl} title={post.title} />
       </div>
       {post.image && (
-        <img src={post.image} alt={post.title} className="rounded mb-8 w-full" />
+        <div className="w-full overflow-hidden rounded-lg mb-8">
+          <img 
+            src={post.image} 
+            alt={post.title} 
+            className="w-full h-auto max-w-full" 
+            style={{ maxWidth: '100%', height: 'auto' }}
+          />
+        </div>
       )}
-      <div className="prose max-w-none text-lg leading-8 text-justify">{post.content}</div>
+      <div 
+        className="prose prose-sm sm:prose-base md:prose-lg max-w-none text-justify"
+        style={{
+          wordWrap: 'break-word',
+          overflowWrap: 'break-word',
+          maxWidth: '100%'
+        }}
+      >
+        <div dangerouslySetInnerHTML={{ __html: post.content }} className="w-full overflow-x-auto" />
+      </div>
       {relatedPosts.length > 0 && (
           <aside className="mt-12 border-t pt-8">
             <h2 className="text-2xl font-bold mb-4">Related Stories</h2>
@@ -139,6 +155,6 @@ export default function PostPage() {
         </article>
         <Sidebar />
       </div>
-    </>
+    </div>
   );
 }

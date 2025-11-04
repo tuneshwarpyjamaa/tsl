@@ -84,15 +84,15 @@ export default function Navbar() {
   };
 
   return (
-    <header className="border-b border-gray-300">
+    <header className="border-b border-gray-300 overflow-x-hidden">
       <div className="container mx-auto px-4">
         {/* Top bar */}
-        <div className="flex items-center justify-between py-2">
+        <div className="flex items-center justify-between py-3">
           <div className="flex items-center gap-4">
             <button className="focus:outline-none md:hidden" onClick={handleMenuClick}>
               <MenuIcon />
             </button>
-            <form onSubmit={handleSearchSubmit} className="hidden md:block">
+            <form onSubmit={handleSearchSubmit} className="hidden md:block flex-1 max-w-md mx-4">
               <div className="relative">
                 <input
                   type="text"
@@ -110,11 +110,12 @@ export default function Navbar() {
             </form>
           </div>
 
-          <Link href="/" className="text-3xl font-serif font-bold text-black uppercase tracking-wider hover:text-gray-800 transition-colors">
-            The Mandate Wire
+          <Link href="/" className="text-2xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider hover:text-gray-800 transition-colors">
+            <span className="hidden md:inline">The Mandate Wire</span>
+            <span className="md:hidden">TMW</span>
           </Link>
 
-          <div className="flex items-center gap-4 relative user-menu-container">
+          <div className="flex items-center gap-2 md:gap-4 relative user-menu-container">
             {isAuthenticated ? (
               <>
                 <div className="mr-8">
@@ -159,19 +160,19 @@ export default function Navbar() {
 
       {/* Bottom navigation bar (Desktop) */}
       <div className="border-t border-gray-300 hidden md:block">
-          <div className="container mx-auto px-4">
-              <nav className="flex items-center justify-center gap-6 text-sm font-bold py-3">
-                  {navLinks.map(link => (
-                      <Link key={link.name} href={link.href} className="hover:underline">{link.name}</Link>
-                  ))}
-              </nav>
-          </div>
+        <div className="container mx-auto p-4 md:p-6">
+          <nav className="flex items-center justify-center gap-6 text-sm font-bold py-3">
+            {navLinks.map(link => (
+              <Link key={link.name} href={link.href} className="hover:underline">{link.name}</Link>
+            ))}
+          </nav>
+        </div>
       </div>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="border-t border-gray-300 md:hidden">
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-4 py-2">
             <nav className="flex flex-col gap-4 text-sm font-bold">
               {navLinks.map(link => (
                 <Link key={link.name} href={link.href} className="hover:underline py-2 border-b border-gray-200">{link.name}</Link>
