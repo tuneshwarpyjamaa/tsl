@@ -3,18 +3,22 @@ import { useEffect, useState } from 'react';
 import api from '@/services/api';
 import Link from 'next/link';
 import Head from 'next/head';
+import SocialShare from '@/components/SocialShare';
 
 export default function PostPage() {
   const router = useRouter();
   const { slug } = router.query;
   const [post, setPost] = useState(null);
+  const [relatedPosts, setRelatedPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (!slug) return;
-    (async () => {
+
+    const fetchPost = async () => {
       try {
+        setLoading(true);
         const { data } = await api.get(`/posts/${encodeURIComponent(slug)}`);
         setPost(data);
       } catch (e) {
@@ -22,8 +26,29 @@ export default function PostPage() {
       } finally {
         setLoading(false);
       }
-    })();
+    };
+
+    fetchPost();
   }, [slug]);
+
+  useEffect(() => {
+    if (!post?.categoryId?.slug) return;
+
+    const fetchRelated = async () => {
+      try {
+        const { data } = await api.get(`/categories/${post.categoryId.slug}/posts`);
+        // Filter out the current post and limit to 4
+        setRelatedPosts(
+          data.filter(p => p.slug !== post.slug).slice(0, 4)
+        );
+      } catch (e) {
+        // It's okay if this fails, the page can still render
+        console.error('Failed to load related posts:', e);
+      }
+    };
+
+    fetchRelated();
+  }, [post]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
@@ -81,9 +106,10 @@ export default function PostPage() {
       </Head>
       <article className="max-w-4xl mx-auto">
       <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
-      <div className="text-sm text-gray-600 mb-8 border-b pb-4">
-        <span>{new Date(post.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
-        {post.categoryId?.name && (
+      <div className="flex justify-between items-center text-sm text-gray-600 mb-8 border-b pb-4">
+        <div>
+          <span>{new Date(post.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
+          {post.categoryId?.name && (
           <>
             <span className="mx-2">•</span>
             <Link href={`/category/${post.categoryId.slug}`} className="hover:underline">
@@ -91,11 +117,23 @@ export default function PostPage() {
             </Link>
           </>
         )}
+        </div>
+        <SocialShare url={postUrl} title={post.title} />
       </div>
       {post.image && (
         <img src={post.image} alt={post.title} className="rounded mb-8 w-full" />
       )}
       <div className="prose max-w-none text-lg leading-8 text-justify">{post.content}</div>
+      {relatedPosts.length > 0 && (
+          <aside className="mt-12 border-t pt-8">
+            <h2 className="text-2xl font-bold mb-4">Related Stories</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {relatedPosts.map(p => (
+                <PostCard key={p.slug} post={p} variant="featured" />
+              ))}
+            </div>
+          </aside>
+        )}
     </article>
     </>
   );

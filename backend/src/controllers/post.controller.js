@@ -17,6 +17,15 @@ export async function listPosts(req, res) {
   res.json(normalized);
 }
 
+export async function getTrendingPosts(req, res) {
+  const posts = await Post.findRecent(5);
+  const normalized = posts.map((p) => ({
+    ...p,
+    categoryId: { name: p.category_name, slug: p.category_slug }
+  }));
+  res.json(normalized);
+}
+
 export async function getPost(req, res) {
   const { slug } = req.params;
   const post = await Post.findBySlug(slug);
