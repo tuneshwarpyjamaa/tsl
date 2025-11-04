@@ -2,9 +2,16 @@
 import Link from 'next/link';
 
 const PostCard = ({ post, variant = 'default' }) => {
+  const categoryName = post.categoryId?.name;
+
   if (variant === 'compact') {
     return (
       <Link href={`/post/${encodeURIComponent(post.slug)}`} className="group block">
+        {categoryName && (
+          <span className="text-red-600 font-semibold text-xs uppercase tracking-wider mb-1 block">
+            {categoryName}
+          </span>
+        )}
         <h4 className="font-medium text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2 text-sm leading-tight">
           {post.title}
         </h4>
@@ -18,6 +25,11 @@ const PostCard = ({ post, variant = 'default' }) => {
   if (variant === 'list') {
     return (
       <Link href={`/post/${encodeURIComponent(post.slug)}`} className="group block py-3 border-b border-gray-100 last:border-0">
+        {categoryName && (
+          <span className="text-red-600 font-semibold text-xs uppercase tracking-wider mb-1 block">
+            {categoryName}
+          </span>
+        )}
         <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors mb-1">
           {post.title}
         </h3>
@@ -50,6 +62,11 @@ const PostCard = ({ post, variant = 'default' }) => {
             </div>
           )}
         </div>
+        {categoryName && (
+          <span className="text-red-600 font-semibold text-xs uppercase tracking-wider mb-1 block">
+            {categoryName}
+          </span>
+        )}
         <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors mb-2 line-clamp-2">
           {post.title}
         </h3>
@@ -80,6 +97,11 @@ const PostCard = ({ post, variant = 'default' }) => {
           </div>
         )}
       </div>
+       {categoryName && (
+        <span className="text-red-600 font-semibold text-xs uppercase tracking-wider mb-1 block">
+          {categoryName}
+        </span>
+      )}
       <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors mb-2">
         {post.title}
       </h3>

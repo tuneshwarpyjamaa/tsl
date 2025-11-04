@@ -18,6 +18,27 @@ export async function getPostsByCategory(req, res) {
   res.json({ category: { name: category.name, slug: category.slug }, posts: normalized });
 }
 
+export async function getFeaturedCategories(req, res) {
+  const featuredSlugs = ['technology', 'world-news', 'business']; // Example slugs
+  const categories = await Promise.all(
+    featuredSlugs.map(slug => Category.findBySlug(slug))
+  );
+
+  const featuredData = await Promise.all(
+    categories.map(async (cat) => {
+      if (!cat) return null;
+      const posts = await Post.findByCategory(cat.id, 5); // Limit to 5 posts
+      return {
+        name: cat.name,
+        slug: cat.slug,
+        posts: posts.map(p => ({ ...p, categoryId: { name: cat.name, slug: cat.slug } })),
+      };
+    })
+  );
+
+  res.json(featuredData.filter(Boolean)); // Filter out any nulls if a category wasn't found
+}
+
 export async function createCategory(req, res) {
   try {
     const { name } = req.body;

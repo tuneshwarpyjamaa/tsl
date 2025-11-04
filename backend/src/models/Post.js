@@ -21,6 +21,17 @@ export class Post {
     return await db.many(query);
   }
 
+  static async findRecent(limit = 5) {
+    const query = `
+      SELECT p.*, c.name as category_name, c.slug as category_slug
+      FROM posts p
+      LEFT JOIN categories c ON p."categoryId" = c.id
+      ORDER BY p."createdAt" DESC
+      LIMIT $1
+    `;
+    return await db.many(query, [limit]);
+  }
+
   static async findBySlug(slug) {
     const query = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
@@ -41,15 +52,20 @@ export class Post {
     return await db.one(query, [id]);
   }
 
-  static async findByCategory(categoryId) {
-    const query = `
+  static async findByCategory(categoryId, limit) {
+    let query = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
       FROM posts p
       LEFT JOIN categories c ON p."categoryId" = c.id
       WHERE p."categoryId" = $1
       ORDER BY p."createdAt" DESC
     `;
-    return await db.many(query, [categoryId]);
+    const params = [categoryId];
+    if (limit) {
+      query += ' LIMIT $2';
+      params.push(limit);
+    }
+    return await db.many(query, params);
   }
 
   static async update(id, data) {

@@ -9,12 +9,23 @@ const PostCard = dynamic(() => import('@/components/PostCard'), {
   loading: () => <div className="animate-pulse h-48 bg-gray-200 rounded"></div>
 });
 
-const FullLayout = ({ posts }) => {
+const FullLayout = ({ posts, trendingPosts, featuredCategories }) => {
+  const [visibleStories, setVisibleStories] = useState(10);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   // Post distribution for news layout
   const heroPost = posts[0] || null;
   const latestNewsPosts = posts.slice(1, 6);
   const featuredPosts = posts.slice(6, 12);
   const moreStoriesPosts = posts.slice(12);
+
+  const handleLoadMore = () => {
+    setLoadingMore(true);
+    setTimeout(() => {
+      setVisibleStories(prev => prev + 3);
+      setLoadingMore(false);
+    }, 500); // Simulate network delay
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4">
@@ -113,6 +124,24 @@ const FullLayout = ({ posts }) => {
         </div>
       </section>
 
+      {/* Category Sections */}
+      {featuredCategories && featuredCategories.length > 0 && (
+        featuredCategories.map(category => (
+          <section key={category.slug} className="mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+              <Link href={`/category/${category.slug}`} className="hover:text-blue-700">
+                {category.name}
+              </Link>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {category.posts.map((p) => (
+                <PostCard key={p.slug} post={p} variant="featured" />
+              ))}
+            </div>
+          </section>
+        ))
+      )}
+
       {/* More Stories Section - If we have additional posts */}
       {moreStoriesPosts.length > 0 && (
         <section className="border-t border-gray-200 pt-6">
@@ -120,10 +149,29 @@ const FullLayout = ({ posts }) => {
             <div className="col-span-12 md:col-span-8">
               <h2 className="text-xl font-bold text-gray-900 mb-4">More Stories</h2>
               <div className="grid gap-4">
-                {moreStoriesPosts.map((p) => (
+                {moreStoriesPosts.slice(0, visibleStories).map((p) => (
                   <PostCard key={p.slug} post={p} variant="list" />
                 ))}
               </div>
+              {visibleStories < moreStoriesPosts.length && (
+                <div className="text-center mt-6">
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="bg-black text-white px-6 py-2 font-semibold rounded hover:bg-gray-800 transition-colors disabled:bg-gray-400"
+                  >
+                    {loadingMore ? (
+                      <div className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                      </div>
+                    ) : 'Load More'}
+                  </button>
+                </div>
+              )}
             </div>
             
             {/* Newsletter Signup or Ads */}
@@ -142,6 +190,19 @@ const FullLayout = ({ posts }) => {
                   </button>
                 </div>
               </div>
+
+              {trendingPosts && trendingPosts.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">Trending</h3>
+                  <ul className="space-y-4">
+                    {trendingPosts.map((p, index) => (
+                      <li key={p.slug || index} className="border-b border-gray-100 pb-2">
+                        <PostCard post={p} variant="compact" />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -208,20 +269,46 @@ export default function HomePage() {
 
 function HomeContent() {
   const [posts, setPosts] = useState([]);
+  const [trendingPosts, setTrendingPosts] = useState([]);
+  const [featuredCategories, setFeaturedCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    (async () => {
+    const fetchFeaturedCategories = async () => {
+      try {
+        const { data } = await api.get('/categories/featured');
+        setFeaturedCategories(data);
+      } catch (e) {
+        console.error('Failed to load featured categories:', e);
+      }
+    };
+
+    const fetchTrending = async () => {
+      try {
+        const { data } = await api.get('/posts/trending');
+        setTrendingPosts(data);
+      } catch (e) {
+        console.error('Failed to load trending posts:', e);
+      }
+    };
+
+    const fetchPosts = async () => {
       try {
         const { data } = await api.get('/posts');
         setPosts(data);
       } catch (e) {
         setError('Failed to load posts');
-      } finally {
-        setLoading(false);
       }
-    })();
+    };
+
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchPosts(), fetchTrending(), fetchFeaturedCategories()]);
+      setLoading(false);
+    };
+
+    loadData();
   }, []);
 
   if (loading) return (
@@ -252,7 +339,7 @@ function HomeContent() {
   // Use FullLayout when we have enough posts, otherwise SimpleLayout
   return (
     <Suspense fallback={<div className="animate-pulse"><div className="h-6 bg-gray-200 rounded w-1/4 mb-6"></div><div className="grid grid-cols-3 gap-6">{[...Array(6)].map((_, i) => (<div key={i} className="h-64 bg-gray-200 rounded"></div>))}</div></div>}>
-      {posts.length >= 7 ? <FullLayout posts={posts} /> : <SimpleLayout posts={posts} />}
+      {posts.length >= 7 ? <FullLayout posts={posts} trendingPosts={trendingPosts} featuredCategories={featuredCategories} /> : <SimpleLayout posts={posts} />}
     </Suspense>
   );
 }
