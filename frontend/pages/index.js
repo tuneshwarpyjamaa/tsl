@@ -10,7 +10,7 @@ const PostCard = dynamic(() => import('@/components/PostCard'), {
 });
 
 const FullLayout = ({ posts, trendingPosts, featuredCategories }) => {
-  const [visibleStories, setVisibleStories] = useState(10);
+  const [visibleStories, setVisibleStories] = useState(3);
   const [loadingMore, setLoadingMore] = useState(false);
 
   // Post distribution for news layout
