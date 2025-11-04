@@ -4,6 +4,7 @@ import api from '@/services/api';
 import Link from 'next/link';
 import Head from 'next/head';
 import SocialShare from '@/components/SocialShare';
+import Sidebar from '@/components/Sidebar';
 
 export default function PostPage() {
   const router = useRouter();
@@ -104,9 +105,10 @@ export default function PostPage() {
           }}
         />
       </Head>
-      <article className="max-w-4xl mx-auto">
-      <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
-      <div className="flex justify-between items-center text-sm text-gray-600 mb-8 border-b pb-4">
+      <div className="max-w-7xl mx-auto px-4 grid grid-cols-12 gap-8">
+        <article className="col-span-12 md:col-span-8">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
+          <div className="flex justify-between items-center text-sm text-gray-600 mb-8 border-b pb-4">
         <div>
           <span>{new Date(post.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
           {post.categoryId?.name && (
@@ -134,7 +136,9 @@ export default function PostPage() {
             </div>
           </aside>
         )}
-    </article>
+        </article>
+        <Sidebar />
+      </div>
     </>
   );
 }
