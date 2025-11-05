@@ -5,7 +5,7 @@ export const permissions = {
     manageCategories: true,
     publishAnyPost: true,
     editAnyPost: true,
-    editOwnPost: true,
+    manageOwnPosts: true,
     readPublishedPosts: true,
   },
   editor: {
@@ -14,16 +14,16 @@ export const permissions = {
     manageCategories: true,
     publishAnyPost: true,
     editAnyPost: true,
-    editOwnPost: true,
+    manageOwnPosts: true,
     readPublishedPosts: true,
   },
   contributor: {
     manageUsers: false,
-    managePosts: true,
+    createPosts: true,
     manageCategories: false,
     publishAnyPost: false,
     editAnyPost: false,
-    editOwnPost: true,
+    manageOwnPosts: true,
     readPublishedPosts: true,
   },
   member: {
@@ -32,7 +32,7 @@ export const permissions = {
     manageCategories: false,
     publishAnyPost: false,
     editAnyPost: false,
-    editOwnPost: false,
+    manageOwnPosts: false,
     readPublishedPosts: true,
   },
 };
