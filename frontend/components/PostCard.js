@@ -1,6 +1,12 @@
 // components/PostCard.jsx
 import Link from 'next/link';
 
+const stripHtml = (html) => {
+  if (typeof window === 'undefined') return html || '';
+  const doc = new DOMParser().parseFromString(html || '', 'text/html');
+  return doc.body.textContent || '';
+};
+
 const PostCard = ({ post, variant = 'default' }) => {
   const categoryName = post.categoryId?.name;
 
@@ -34,7 +40,7 @@ const PostCard = ({ post, variant = 'default' }) => {
           {post.title}
         </h3>
         <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-          {(post.content || '').slice(0, 120)}...
+          {stripHtml(post.content || '').slice(0, 120)}...
         </p>
         <div className="flex items-center text-xs text-gray-500">
           <span>By {post.author || 'Staff Writer'}</span>
@@ -71,7 +77,7 @@ const PostCard = ({ post, variant = 'default' }) => {
           {post.title}
         </h3>
         <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-          {(post.content || '').slice(0, 100)}...
+          {stripHtml(post.content || '').slice(0, 100)}...
         </p>
         <div className="flex items-center text-xs text-gray-500">
           <span>{new Date().toLocaleDateString()}</span>
