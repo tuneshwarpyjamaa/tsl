@@ -1,6 +1,9 @@
 import slugify from 'slugify';
 import { Post } from '../models/Post.js';
 import { Category } from '../models/Category.js';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+const execAsync = promisify(exec);
 export async function listPosts(req, res) {
   const { q } = req.query;
   let posts;
@@ -94,5 +97,52 @@ export async function deletePost(req, res) {
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Failed to delete post' });
+  }
+}
+
+export async function generateArticle(req, res) {
+  try {
+    const { query, count = 1, category = 'news' } = req.body;
+    
+    if (!query) {
+      return res.status(400).json({ error: 'Query parameter is required' });
+    }
+
+    // Validate count is between 1 and 10
+    const articleCount = Math.min(10, Math.max(1, parseInt(count) || 1));
+    
+    // Execute the article script with the provided parameters
+    const scriptPath = 'c:/Users/Amish Harsoor/OneDrive/Desktop/New folder/tmw_blog/article_script.py';
+    const command = `python "${scriptPath}" "${query}" --count ${articleCount} --category "${category}"`;
+    
+    const { stdout, stderr } = await execAsync(command, { maxBuffer: 1024 * 1024 * 5 });
+    
+    if (stderr) {
+      console.error('Error generating article:', stderr);
+      return res.status(500).json({ error: 'Error generating article', details: stderr });
+    }
+    
+    // Parse the output to get the generated articles
+    let articles = [];
+    try {
+      // The script outputs JSON string for each article
+      const lines = stdout.split('\n').filter(line => line.trim().startsWith('{'));
+      articles = lines.map(line => JSON.parse(line));
+    } catch (parseError) {
+      console.error('Error parsing article output:', parseError);
+      return res.status(500).json({ 
+        error: 'Error parsing generated articles', 
+        details: parseError.message,
+        rawOutput: stdout
+      });
+    }
+    
+    res.json({ success: true, articles });
+  } catch (error) {
+    console.error('Failed to generate article:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate article', 
+      details: error.message 
+    });
   }
 }

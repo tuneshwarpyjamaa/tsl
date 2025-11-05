@@ -31,6 +31,159 @@ export default function AdminPage() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState('');
   const [pdfSuccess, setPdfSuccess] = useState('');
+  
+  // Article generation state
+  const [articleQuery, setArticleQuery] = useState('Bihar Election 2025');
+  const [articleCount, setArticleCount] = useState(3); // Default to 3 articles
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedArticles, setGeneratedArticles] = useState([]);
+  const [generationError, setGenerationError] = useState('');
+  
+  // Available categories
+  const categoriesList = [
+    { id: '1f44d1ed-1ad6-4eb7-bd23-fc09e27a3535', name: 'Technology', slug: 'technology' },
+    { id: '3ed49a33-6286-4cb8-9001-efa0585b6a22', name: 'Travel', slug: 'travel' },
+    { id: '4cd9be42-3e8d-46d1-ba1e-9defd97d4a49', name: 'Culture', slug: 'culture' },
+    { id: '573d331c-3b63-4bcb-a725-d90d8237c9bf', name: 'News', slug: 'news' },
+    { id: '573f87c1-f932-42b8-81fb-d16e8054cb03', name: 'Sports', slug: 'sports' },
+    { id: '6fb11e34-2b60-48b0-8197-62386f3f8bed', name: 'Arts', slug: 'arts' },
+    { id: '967aef98-0bad-43ee-90b6-1ed27ca1786a', name: 'Sport', slug: 'sport' },
+    { id: 'a950eb49-29d9-408b-8eba-ef71de8d2ced', name: 'Earth', slug: 'earth' },
+    { id: 'cf2bc611-e091-4d8f-ad91-bf65fdc610ff', name: 'Business', slug: 'business' },
+    { id: 'e107837a-f9dd-4fc5-af5e-bc92df59b4ec', name: 'Innovation', slug: 'innovation' }
+  ];
+  
+  // Set default category
+  useEffect(() => {
+    if (categoriesList.length > 0 && !selectedCategory) {
+      setSelectedCategory(categoriesList[0].slug);
+    }
+  }, []);
+
+  async function generateArticles(e) {
+    e.preventDefault();
+    if (!articleQuery.trim()) {
+      setGenerationError('Please enter a search query');
+      return;
+    }
+    
+    setIsGenerating(true);
+    setGenerationError('');
+    setGeneratedArticles([]);
+    
+    try {
+      const { data } = await api.post('/posts/generate', { query: articleQuery });
+      if (data.articles && data.articles.length > 0) {
+        setGeneratedArticles(data.articles);
+        setPostSuccess(`${data.articles.length} articles generated successfully!`);
+      } else {
+        setGenerationError('No articles were generated. Please try a different query.');
+      }
+    } catch (error) {
+      console.error('Error generating articles:', error);
+      setGenerationError(error.response?.data?.error || 'Failed to generate articles');
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  async function saveGeneratedArticle(article) {
+    try {
+      setPostLoading(true);
+      setPostError('');
+      setPostSuccess('');
+      
+      // Create a slug from the title
+      const slug = article.title
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 200);
+      
+      // Use the first category or a default one
+      const categorySlug = categories.length > 0 ? categories[0].slug : 'politics';
+      
+      await api.post('/posts', {
+        title: article.title,
+        slug,
+        content: article.content,
+        categorySlug,
+        author: 'AI Writer',
+        image: article.image || ''
+      });
+      
+      setPostSuccess('Article saved successfully!');
+      fetchPosts(); // Refresh the posts list
+    } catch (error) {
+      console.error('Error saving article:', error);
+      setPostError(error.response?.data?.error || 'Failed to save article');
+    } finally {
+      setPostLoading(false);
+    }
+  }
+
+  async function generateArticles(e) {
+    e.preventDefault();
+    if (!articleQuery.trim()) {
+      setGenerationError('Please enter a search query');
+      return;
+    }
+    
+    setIsGenerating(true);
+    setGenerationError('');
+    setGeneratedArticles([]);
+    
+    try {
+      const { data } = await api.post('/posts/generate', { query: articleQuery });
+      if (data.articles && data.articles.length > 0) {
+        setGeneratedArticles(data.articles);
+        setPostSuccess(`${data.articles.length} articles generated successfully!`);
+      } else {
+        setGenerationError('No articles were generated. Please try a different query.');
+      }
+    } catch (error) {
+      console.error('Error generating articles:', error);
+      setGenerationError(error.response?.data?.error || 'Failed to generate articles');
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  async function saveGeneratedArticle(article) {
+    try {
+      setPostLoading(true);
+      setPostError('');
+      setPostSuccess('');
+      
+      // Create a slug from the title
+      const slug = article.title
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 200);
+      
+      // Use the first category or a default one
+      const categorySlug = categories.length > 0 ? categories[0].slug : 'politics';
+      
+      await api.post('/posts', {
+        title: article.title,
+        slug,
+        content: article.content,
+        categorySlug,
+        author: 'AI Writer',
+        image: article.image || ''
+      });
+      
+      setPostSuccess('Article saved successfully!');
+      fetchPosts(); // Refresh the posts list
+    } catch (error) {
+      console.error('Error saving article:', error);
+      setPostError(error.response?.data?.error || 'Failed to save article');
+    } finally {
+      setPostLoading(false);
+    }
+  }
 
   async function onPdfUpload(e) {
     e.preventDefault();
@@ -225,6 +378,110 @@ export default function AdminPage() {
               </div>
             )}
           </div>
+          {/* Article Generation Section */}
+          <div className="mb-8 p-6 bg-white rounded-lg shadow">
+            <h2 className="text-xl font-bold mb-4">Generate Articles with AI</h2>
+            <form onSubmit={generateArticles} className="mb-4">
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="article-query">
+                  Search Query
+                </label>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="md:col-span-2">
+                      <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="article-query">
+                        Search Query
+                      </label>
+                      <input
+                        id="article-query"
+                        type="text"
+                        value={articleQuery}
+                        onChange={(e) => setArticleQuery(e.target.value)}
+                        className="w-full shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        placeholder="Enter a topic or query"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="article-count">
+                          Count
+                        </label>
+                        <input
+                          id="article-count"
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={articleCount}
+                          onChange={(e) => setArticleCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                          className="w-full text-center border rounded py-2 px-2 text-gray-700 focus:outline-none focus:shadow-outline"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="article-category">
+                          Category
+                        </label>
+                        <select
+                          id="article-category"
+                          value={selectedCategory}
+                          onChange={(e) => setSelectedCategory(e.target.value)}
+                          className="w-full border rounded py-2 px-2 text-gray-700 focus:outline-none focus:shadow-outline"
+                        >
+                          {categoriesList.map((category) => (
+                            <option key={category.id} value={category.slug}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <button
+                      type="submit"
+                      disabled={isGenerating || !selectedCategory}
+                      className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline ${
+                        isGenerating || !selectedCategory ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {isGenerating ? 'Generating...' : `Generate ${articleCount} Article${articleCount > 1 ? 's' : ''}`}
+                    </button>
+                  </div>
+                </div>
+                {generationError && (
+                  <p className="text-red-500 text-xs italic mt-1">{generationError}</p>
+                )}
+              </div>
+            </form>
+
+            {generatedArticles.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-3">Generated Articles</h3>
+                <div className="space-y-4">
+                  {generatedArticles.map((article, index) => (
+                    <div key={index} className="border rounded p-4 bg-gray-50">
+                      <h4 className="font-bold text-lg mb-2">{article.title}</h4>
+                      <p className="text-gray-700 mb-3 line-clamp-3">
+                        {article.content?.substring(0, 200)}...
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500">
+                          {article.content ? Math.ceil(article.content.split(' ').length / 200) : 0} min read
+                        </span>
+                        <button
+                          onClick={() => saveGeneratedArticle(article)}
+                          disabled={postLoading}
+                          className="bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-1 px-3 rounded focus:outline-none focus:shadow-outline"
+                        >
+                          {postLoading ? 'Saving...' : 'Save Article'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           <h2 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200">Create New Post</h2>
           <form onSubmit={onPostSubmit} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">

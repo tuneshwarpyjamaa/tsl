@@ -7,6 +7,7 @@ export const permissions = {
     editAnyPost: true,
     manageOwnPosts: true,
     readPublishedPosts: true,
+    createPosts: true,
   },
   editor: {
     manageUsers: false,
@@ -16,6 +17,7 @@ export const permissions = {
     editAnyPost: true,
     manageOwnPosts: true,
     readPublishedPosts: true,
+    createPosts: true,
   },
   contributor: {
     manageUsers: false,
