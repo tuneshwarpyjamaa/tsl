@@ -23,7 +23,11 @@ export default function CategoryPage() {
         const res = await api.get(`/categories/${slug}/posts`);
         setData(res.data);
       } catch (e) {
-        setError('Category not found');
+        console.error('Error fetching category:', e);
+        setError('Failed to load category. Please try again later.');
+        if (e.response?.status === 404) {
+          setError('Category not found');
+        }
       } finally {
         setLoading(false);
       }

@@ -57,7 +57,7 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'News', href: '/category/news' },
-    { name: 'Sport', href: '/category/sport' },
+    { name: 'Sports', href: '/category/sports' },
     { name: 'Business', href: '/category/business' },
     { name: 'Innovation', href: '/category/innovation' },
     { name: 'Culture', href: '/category/culture' },
