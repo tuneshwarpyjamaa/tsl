@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import api, { setAuthToken, getUserRole } from '@/services/api';
+import DeleteConfirmation from '@/components/modals/DeleteConfirmation';
+import EditConfirmation from '@/components/modals/EditConfirmation';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -15,6 +17,7 @@ export default function AdminPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [categories, setCategories] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [editingPost, setEditingPost] = useState(null);
   const [postData, setPostData] = useState({
     title: '',
     slug: '',
@@ -26,6 +29,9 @@ export default function AdminPage() {
   const [postLoading, setPostLoading] = useState(false);
   const [postError, setPostError] = useState('');
   const [postSuccess, setPostSuccess] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   // Available categories
   const categoriesList = [
@@ -100,8 +106,15 @@ export default function AdminPage() {
     setPostError('');
     setPostSuccess('');
     try {
-      await api.post('/posts', postData);
-      setPostSuccess('Post created successfully!');
+      if (editingPost) {
+        await api.put(`/posts/${editingPost.id}`, postData);
+        setPostSuccess('Post updated successfully!');
+      } else {
+        await api.post('/posts', postData);
+        setPostSuccess('Post created successfully!');
+      }
+      
+      // Reset form
       setPostData({
         title: '',
         slug: '',
@@ -110,27 +123,70 @@ export default function AdminPage() {
         author: 'Admin',
         image: ''
       });
+      setEditingPost(null);
       fetchPosts(); // Refresh posts list
     } catch (e) {
-      setPostError('Failed to create post');
+      setPostError(editingPost ? 'Failed to update post' : 'Failed to create post');
     } finally {
       setPostLoading(false);
     }
   }
 
-  async function deletePost(id) {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editConfirm, setEditConfirm] = useState('');
+
+  const handleDelete = async () => {
     try {
-      await api.delete(`/posts/${id}`);
+      await api.delete(`/posts/${selectedPost.id}`);
+      setShowDeleteModal(false);
+      setSelectedPost(null);
       fetchPosts(); // Refresh posts list
     } catch (e) {
       console.error('Failed to delete post:', e);
+      setPostError('Failed to delete post. Please try again.');
     }
-  }
+  };
+
+  const handleEditConfirm = () => {
+    setShowEditModal(false);
+    setEditingPost(selectedPost);
+    setPostData({
+      title: selectedPost.title,
+      slug: selectedPost.slug,
+      content: selectedPost.content,
+      categorySlug: selectedPost.categoryId?.slug || '',
+      author: selectedPost.author,
+      image: selectedPost.image
+    });
+    setSelectedPost(null);
+  };
 
   const inputStyles = "w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500";
   const buttonStyles = "bg-black text-white px-4 py-2 rounded text-sm font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors";
   const labelStyles = "block text-sm font-semibold mb-1 text-gray-700";
+
+  const startEditing = (post) => {
+    setSelectedPost(post);
+    setShowEditModal(true);
+  };
+
+  const confirmDeletePost = (post) => {
+    setSelectedPost(post);
+    setShowDeleteModal(true);
+  };
+
+  const cancelEdit = () => {
+    setEditingPost(null);
+    setPostData({
+      title: '',
+      slug: '',
+      content: '',
+      categorySlug: '',
+      author: 'Admin',
+      image: ''
+    });
+  };
 
   if (checkingAuth) {
     return (
@@ -166,9 +222,11 @@ export default function AdminPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Create Post Form */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-<h2 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200">Create New Post</h2>
+        {/* Create/Edit Post Form */}
+        <div className="bg-white border border-gray-200 rounded-lg p-4" id="post-form">
+          <h2 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200">
+            {editingPost ? 'Edit Post' : 'Create New Post'}
+          </h2>
           <form onSubmit={onPostSubmit} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -235,9 +293,23 @@ export default function AdminPage() {
               />
             </div>
 
-            <button disabled={postLoading} className={`${buttonStyles} w-full py-2.5`}>
-              {postLoading ? 'Creating Post...' : 'Create Post'}
-            </button>
+            <div className="flex space-x-2">
+              <button type="submit" disabled={postLoading} className={`${buttonStyles} flex-1 py-2.5`}>
+                {postLoading 
+                  ? (editingPost ? 'Updating...' : 'Creating...')
+                  : (editingPost ? 'Update Post' : 'Create Post')
+                }
+              </button>
+              {editingPost && (
+                <button 
+                  type="button" 
+                  onClick={cancelEdit}
+                  className="bg-gray-200 text-gray-800 px-4 py-2.5 rounded text-sm font-medium hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </form>
 
           {postError && (
@@ -273,12 +345,26 @@ export default function AdminPage() {
                       <span>Category: {post.categoryId?.name || 'Uncategorized'}</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => deletePost(post.id)}
-                    className="ml-3 bg-red-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-red-600 transition-colors flex-shrink-0"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startEditing(post);
+                      }}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-blue-600 transition-colors flex-shrink-0"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        confirmDeletePost(post);
+                      }}
+                      className="bg-red-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-red-600 transition-colors flex-shrink-0"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -291,6 +377,22 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmation
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        itemName={`the post "${selectedPost?.title || ''}"`}
+      />
+
+      {/* Edit Confirmation Modal */}
+      <EditConfirmation
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onConfirm={handleEditConfirm}
+        itemName={`the post "${selectedPost?.title || ''}"`}
+      />
     </div>
   );
 }

@@ -62,8 +62,12 @@ export async function createPost(req, res) {
 export async function updatePost(req, res) {
   try {
     const { id } = req.params;
-    const { title, content, categorySlug, author, image } = req.body;
-    const data = { title, content, author, image };
+    const { title, slug, content, categorySlug, author, image } = req.body;
+    const data = { title, slug, content, author, image };
+    
+    if (!slug) {
+      return res.status(400).json({ error: 'Slug is required' });
+    }
     // Ownership enforcement for contributors
     const role = String(req.user?.role || '').toLowerCase();
     const existing = await Post.findById(id).catch(() => null);
