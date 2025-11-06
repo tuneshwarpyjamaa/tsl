@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "builds": [
     {
       "src": "frontend/package.json",
@@ -7,9 +8,17 @@
     {
       "src": "backend/src/index.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "frontend/pages/api/run-python.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
+    {
+      "src": "/api/run-python",
+      "dest": "/api/run-python"
+    },
     {
       "src": "/api/(.*)",
       "dest": "backend/src/index.js"

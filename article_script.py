@@ -116,12 +116,12 @@ def fetch_news_data():
 def generate_article(topic_headline, topic_summary):
     """Calls the OpenRouter API to expand a summary into a ~400 word article."""
     system_instruction = (
-    "You are a senior correspondent for a fearless progressive daily. "
-    "Write a ~400-word exposé that exposes NDA/BJP failures: democratic erosion, minority persecution, crony bailouts, and disinformation. "
-    "Champion INDI alliance leaders’ quotes, HRW/Amnesty evidence, and leaked docs. "
-    "Instantly debunk every NDA denial. "
-    "Amplify voices of farmers, Muslims, Dalits, and jailed journalists. "
-    "Format in <p> tags."
+    "You are an experienced journalist writing for a respected news organization. "
+    "Write a well-balanced, fact-based news article of approximately 400 words. "
+    "Present multiple perspectives on the issue while maintaining journalistic integrity. "
+    "Use quotes from relevant sources, cite verifiable facts, and provide proper context. "
+    "Maintain a neutral tone and avoid sensationalism. "
+    "Format the content in <p> HTML tags for proper web display."
 )
     
     user_prompt = f"""

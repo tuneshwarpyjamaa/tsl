@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import api, { setAuthToken, getUserRole } from '@/services/api';
+import DeleteConfirmation from '@/components/modals/DeleteConfirmation';
+import EditConfirmation from '@/components/modals/EditConfirmation';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -15,6 +17,7 @@ export default function AdminPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [categories, setCategories] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [editingPost, setEditingPost] = useState(null);
   const [postData, setPostData] = useState({
     title: '',
     slug: '',
@@ -26,20 +29,10 @@ export default function AdminPage() {
   const [postLoading, setPostLoading] = useState(false);
   const [postError, setPostError] = useState('');
   const [postSuccess, setPostSuccess] = useState('');
-  const [pdfFile, setPdfFile] = useState(null);
-  const [pdfCategory, setPdfCategory] = useState('');
-  const [pdfLoading, setPdfLoading] = useState(false);
-  const [pdfError, setPdfError] = useState('');
-  const [pdfSuccess, setPdfSuccess] = useState('');
-  
-  // Article generation state
-  const [articleQuery, setArticleQuery] = useState('Bihar Election 2025');
-  const [articleCount, setArticleCount] = useState(3); // Default to 3 articles
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedArticles, setGeneratedArticles] = useState([]);
-  const [generationError, setGenerationError] = useState('');
-  
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+
   // Available categories
   const categoriesList = [
     { id: '1f44d1ed-1ad6-4eb7-bd23-fc09e27a3535', name: 'Technology', slug: 'technology' },
@@ -53,102 +46,6 @@ export default function AdminPage() {
     { id: 'cf2bc611-e091-4d8f-ad91-bf65fdc610ff', name: 'Business', slug: 'business' },
     { id: 'e107837a-f9dd-4fc5-af5e-bc92df59b4ec', name: 'Innovation', slug: 'innovation' }
   ];
-  
-  // Set default category
-  useEffect(() => {
-    if (categoriesList.length > 0 && !selectedCategory) {
-      setSelectedCategory(categoriesList[0].slug);
-    }
-  }, []);
-
-  async function generateArticles(e) {
-    e.preventDefault();
-    if (!articleQuery.trim()) {
-      setGenerationError('Please enter a search query');
-      return;
-    }
-    
-    setIsGenerating(true);
-    setGenerationError('');
-    setGeneratedArticles([]);
-    
-    try {
-      const { data } = await api.post('/posts/generate', {
-        query: articleQuery,
-        count: articleCount,
-        category: selectedCategory,
-      });
-      if (data.articles && data.articles.length > 0) {
-        setGeneratedArticles(data.articles);
-        setPostSuccess(`${data.articles.length} articles generated successfully!`);
-      } else {
-        setGenerationError('No articles were generated. Please try a different query.');
-      }
-    } catch (error) {
-      console.error('Error generating articles:', error);
-      setGenerationError(error.response?.data?.error || 'Failed to generate articles');
-    } finally {
-      setIsGenerating(false);
-    }
-  }
-
-  async function saveGeneratedArticle(article) {
-    try {
-      setPostLoading(true);
-      setPostError('');
-      setPostSuccess('');
-      
-      // Create a slug from the title
-      const slug = article.title
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 200);
-      
-      await api.post('/posts', {
-        title: article.title,
-        slug,
-        content: article.content,
-        categorySlug: selectedCategory, // Use the selected category
-        author: 'AI Writer',
-        image: article.image || ''
-      });
-      
-      setPostSuccess('Article saved successfully!');
-      fetchPosts(); // Refresh the posts list
-    } catch (error) {
-      console.error('Error saving article:', error);
-      setPostError(error.response?.data?.error || 'Failed to save article');
-    } finally {
-      setPostLoading(false);
-    }
-  }
-
-
-  async function onPdfUpload(e) {
-    e.preventDefault();
-    if (!pdfFile || !pdfCategory) {
-      setPdfError('Please select a file and a category');
-      return;
-    }
-    setPdfLoading(true);
-    setPdfError('');
-    setPdfSuccess('');
-    try {
-      const formData = new FormData();
-      formData.append('file', pdfFile);
-      formData.append('categorySlug', pdfCategory);
-      await api.post('/posts/upload/pdf', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setPdfSuccess('PDF uploaded and posts created successfully!');
-      fetchPosts(); // Refresh posts list
-    } catch (e) {
-      setPdfError('Failed to upload PDF');
-    } finally {
-      setPdfLoading(false);
-    }
-  }
 
   useEffect(() => {
     const role = getUserRole();
@@ -209,8 +106,15 @@ export default function AdminPage() {
     setPostError('');
     setPostSuccess('');
     try {
-      await api.post('/posts', postData);
-      setPostSuccess('Post created successfully!');
+      if (editingPost) {
+        await api.put(`/posts/${editingPost.id}`, postData);
+        setPostSuccess('Post updated successfully!');
+      } else {
+        await api.post('/posts', postData);
+        setPostSuccess('Post created successfully!');
+      }
+      
+      // Reset form
       setPostData({
         title: '',
         slug: '',
@@ -219,27 +123,70 @@ export default function AdminPage() {
         author: 'Admin',
         image: ''
       });
+      setEditingPost(null);
       fetchPosts(); // Refresh posts list
     } catch (e) {
-      setPostError('Failed to create post');
+      setPostError(editingPost ? 'Failed to update post' : 'Failed to create post');
     } finally {
       setPostLoading(false);
     }
   }
 
-  async function deletePost(id) {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editConfirm, setEditConfirm] = useState('');
+
+  const handleDelete = async () => {
     try {
-      await api.delete(`/posts/${id}`);
+      await api.delete(`/posts/${selectedPost.id}`);
+      setShowDeleteModal(false);
+      setSelectedPost(null);
       fetchPosts(); // Refresh posts list
     } catch (e) {
       console.error('Failed to delete post:', e);
+      setPostError('Failed to delete post. Please try again.');
     }
-  }
+  };
+
+  const handleEditConfirm = () => {
+    setShowEditModal(false);
+    setEditingPost(selectedPost);
+    setPostData({
+      title: selectedPost.title,
+      slug: selectedPost.slug,
+      content: selectedPost.content,
+      categorySlug: selectedPost.categoryId?.slug || '',
+      author: selectedPost.author,
+      image: selectedPost.image
+    });
+    setSelectedPost(null);
+  };
 
   const inputStyles = "w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500";
   const buttonStyles = "bg-black text-white px-4 py-2 rounded text-sm font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors";
   const labelStyles = "block text-sm font-semibold mb-1 text-gray-700";
+
+  const startEditing = (post) => {
+    setSelectedPost(post);
+    setShowEditModal(true);
+  };
+
+  const confirmDeletePost = (post) => {
+    setSelectedPost(post);
+    setShowDeleteModal(true);
+  };
+
+  const cancelEdit = () => {
+    setEditingPost(null);
+    setPostData({
+      title: '',
+      slug: '',
+      content: '',
+      categorySlug: '',
+      author: 'Admin',
+      image: ''
+    });
+  };
 
   if (checkingAuth) {
     return (
@@ -275,154 +222,11 @@ export default function AdminPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Create Post Form */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-            <h2 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200">Upload PDF</h2>
-            <form onSubmit={onPdfUpload} className="space-y-3">
-              <div>
-                <label className={labelStyles}>PDF File</label>
-                <input
-                  type="file"
-                  onChange={(e) => setPdfFile(e.target.files[0])}
-                  className={inputStyles}
-                  accept=".pdf"
-                />
-              </div>
-              <div>
-                <label className={labelStyles}>Category</label>
-                <select
-                  className={inputStyles}
-                  value={pdfCategory}
-                  onChange={(e) => setPdfCategory(e.target.value)}
-                  required
-                >
-                  <option value="">Select category</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.slug}>{cat.name}</option>
-                  ))}
-                </select>
-              </div>
-              <button disabled={pdfLoading} className={`${buttonStyles} w-full py-2.5`}>
-                {pdfLoading ? 'Uploading...' : 'Upload PDF'}
-              </button>
-            </form>
-            {pdfError && (
-              <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-                {pdfError}
-              </div>
-            )}
-            {pdfSuccess && (
-              <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
-                {pdfSuccess}
-              </div>
-            )}
-          </div>
-          {/* Article Generation Section */}
-          <div className="mb-8 p-6 bg-white rounded-lg shadow">
-            <h2 className="text-xl font-bold mb-4">Generate Articles with AI</h2>
-            <form onSubmit={generateArticles} className="mb-4">
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="article-query">
-                  Search Query
-                </label>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="md:col-span-2">
-                      <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="article-query">
-                        Search Query
-                      </label>
-                      <input
-                        id="article-query"
-                        type="text"
-                        value={articleQuery}
-                        onChange={(e) => setArticleQuery(e.target.value)}
-                        className="w-full shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        placeholder="Enter a topic or query"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="article-count">
-                          Count
-                        </label>
-                        <input
-                          id="article-count"
-                          type="number"
-                          min="1"
-                          max="10"
-                          value={articleCount}
-                          onChange={(e) => setArticleCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-                          className="w-full text-center border rounded py-2 px-2 text-gray-700 focus:outline-none focus:shadow-outline"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="article-category">
-                          Category
-                        </label>
-                        <select
-                          id="article-category"
-                          value={selectedCategory}
-                          onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="w-full border rounded py-2 px-2 text-gray-700 focus:outline-none focus:shadow-outline"
-                        >
-                          {categoriesList.map((category) => (
-                            <option key={category.id} value={category.slug}>
-                              {category.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <button
-                      type="submit"
-                      disabled={isGenerating || !selectedCategory}
-                      className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline ${
-                        isGenerating || !selectedCategory ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      {isGenerating ? 'Generating...' : `Generate ${articleCount} Article${articleCount > 1 ? 's' : ''}`}
-                    </button>
-                  </div>
-                </div>
-                {generationError && (
-                  <p className="text-red-500 text-xs italic mt-1">{generationError}</p>
-                )}
-              </div>
-            </form>
-
-            {generatedArticles.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-3">Generated Articles</h3>
-                <div className="space-y-4">
-                  {generatedArticles.map((article, index) => (
-                    <div key={index} className="border rounded p-4 bg-gray-50">
-                      <h4 className="font-bold text-lg mb-2">{article.title}</h4>
-                      <p className="text-gray-700 mb-3 line-clamp-3">
-                        {article.content?.substring(0, 200)}...
-                      </p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-500">
-                          {article.content ? Math.ceil(article.content.split(' ').length / 200) : 0} min read
-                        </span>
-                        <button
-                          onClick={() => saveGeneratedArticle(article)}
-                          disabled={postLoading}
-                          className="bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-1 px-3 rounded focus:outline-none focus:shadow-outline"
-                        >
-                          {postLoading ? 'Saving...' : 'Save Article'}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <h2 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200">Create New Post</h2>
+        {/* Create/Edit Post Form */}
+        <div className="bg-white border border-gray-200 rounded-lg p-4" id="post-form">
+          <h2 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200">
+            {editingPost ? 'Edit Post' : 'Create New Post'}
+          </h2>
           <form onSubmit={onPostSubmit} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -489,9 +293,23 @@ export default function AdminPage() {
               />
             </div>
 
-            <button disabled={postLoading} className={`${buttonStyles} w-full py-2.5`}>
-              {postLoading ? 'Creating Post...' : 'Create Post'}
-            </button>
+            <div className="flex space-x-2">
+              <button type="submit" disabled={postLoading} className={`${buttonStyles} flex-1 py-2.5`}>
+                {postLoading 
+                  ? (editingPost ? 'Updating...' : 'Creating...')
+                  : (editingPost ? 'Update Post' : 'Create Post')
+                }
+              </button>
+              {editingPost && (
+                <button 
+                  type="button" 
+                  onClick={cancelEdit}
+                  className="bg-gray-200 text-gray-800 px-4 py-2.5 rounded text-sm font-medium hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </form>
 
           {postError && (
@@ -527,12 +345,26 @@ export default function AdminPage() {
                       <span>Category: {post.categoryId?.name || 'Uncategorized'}</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => deletePost(post.id)}
-                    className="ml-3 bg-red-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-red-600 transition-colors flex-shrink-0"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startEditing(post);
+                      }}
+                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-blue-600 transition-colors flex-shrink-0"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        confirmDeletePost(post);
+                      }}
+                      className="bg-red-500 text-white px-2 py-1 rounded text-xs font-medium hover:bg-red-600 transition-colors flex-shrink-0"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -545,6 +377,22 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmation
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        itemName={`the post "${selectedPost?.title || ''}"`}
+      />
+
+      {/* Edit Confirmation Modal */}
+      <EditConfirmation
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onConfirm={handleEditConfirm}
+        itemName={`the post "${selectedPost?.title || ''}"`}
+      />
     </div>
   );
 }

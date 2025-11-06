@@ -3,13 +3,24 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+import path from 'path';
 import { connectDB } from './config/db.js';
 import authRoutes from './routes/auth.routes.js';
 import postRoutes from './routes/post.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import userRoutes from './routes/user.routes.js';
 
-dotenv.config();
+// Load .env from the exact path
+const envPath = 'C:\\Users\\Amish Harsoor\\OneDrive\\Desktop\\New folder\\tmw_blog\\.env';
+dotenv.config({ path: envPath });
+
+// Log environment variables for debugging
+console.log('Environment variables loaded from:', envPath);
+console.log('Environment variables:', {
+  hasOpenRouterKey: !!process.env.OPENROUTER_API_KEY,
+  hasNewsApiKey: !!process.env.NEWS_API_KEY,
+  hasDbUrl: !!process.env.DATABASE_URL
+});
 
 // Connect to database
 connectDB(process.env.DATABASE_URL).catch(err => {

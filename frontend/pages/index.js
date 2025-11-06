@@ -173,24 +173,7 @@ const FullLayout = ({ posts, trendingPosts, featuredCategories }) => {
                 </div>
               )}
             </div>
-            
-            {/* Newsletter Signup or Ads */}
             <div className="col-span-12 md:col-span-4">
-              <div className="bg-gray-100 p-4 rounded-lg border border-gray-200">
-                <h3 className="font-bold text-gray-900 mb-2">Subscribe to our newsletter</h3>
-                <p className="text-sm text-gray-600 mb-3">Get the latest news delivered to your inbox</p>
-                <div className="flex">
-                  <input 
-                    type="email" 
-                    placeholder="Your email" 
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-l focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                  <button className="bg-blue-600 text-white px-4 py-2 text-sm font-medium rounded-r hover:bg-blue-700 transition-colors">
-                    Subscribe
-                  </button>
-                </div>
-              </div>
-
               {trendingPosts && trendingPosts.length > 0 && (
                 <div className="mt-8">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">Trending</h3>
@@ -225,49 +208,6 @@ const SimpleLayout = ({ posts }) => {
 };
 
 export default function HomePage() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  return (
-    <>
-      <Head>
-        <title>TMW Blog - Latest News and Stories</title>
-        <meta name="description" content="Discover the latest news, stories, and insights on TMW Blog. Your go-to source for engaging content across various categories." />
-        <meta name="keywords" content="news, blog, latest stories, TMW, articles" />
-        <link rel="canonical" href="https://yourdomain.com" />
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="TMW Blog - Latest News and Stories" />
-        <meta property="og:description" content="Discover the latest news, stories, and insights on TMW Blog." />
-        <meta property="og:url" content="https://yourdomain.com" />
-        <meta property="og:image" content="https://yourdomain.com/og-image-home.jpg" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="TMW Blog - Latest News and Stories" />
-        <meta name="twitter:description" content="Discover the latest news, stories, and insights on TMW Blog." />
-        <meta name="twitter:image" content="https://yourdomain.com/twitter-image-home.jpg" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebPage",
-              "name": "TMW Blog Homepage",
-              "url": "https://yourdomain.com",
-              "description": "Latest news and stories on TMW Blog",
-              "publisher": {
-                "@type": "Organization",
-                "name": "TMW Blog"
-              }
-            })
-          }}
-        />
-      </Head>
-      <HomeContent />
-    </>
-  );
-}
-
-function HomeContent() {
   const [posts, setPosts] = useState([]);
   const [trendingPosts, setTrendingPosts] = useState([]);
   const [featuredCategories, setFeaturedCategories] = useState([]);
