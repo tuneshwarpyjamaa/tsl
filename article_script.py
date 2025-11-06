@@ -8,6 +8,10 @@ from urllib.parse import urlparse, unquote
 import uuid
 import re
 import html
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Set console to use UTF-8 encoding
 if sys.platform.startswith('win'):
@@ -15,9 +19,9 @@ if sys.platform.startswith('win'):
     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'replace')
 
 # API Keys
-OPENROUTER_API_KEY = "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"
-NEWS_API_KEY = "8c80b0fb0de24365a849b334141cdae5"
-DATABASE_URL = "postgresql://postgres.euovankvxwzohwkpxrpw:HelloWorld123%40123@aws-1-ap-south-1.pooler.supabase.com:6543/postgres"
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+NEWS_API_KEY = os.getenv("NEWS_API_KEY")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Configuration
 MODEL_NAME = "google/gemini-2.5-flash"
