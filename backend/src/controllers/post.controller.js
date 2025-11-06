@@ -118,7 +118,7 @@ export async function generateArticle(req, res) {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
     const scriptPath = path.resolve(__dirname, '../../../article_script.py');
-    const command = `python "${scriptPath}" "${query}" --count ${articleCount} --category "${category}"`;
+    const command = `python3 "${scriptPath}" "${query}" --count ${articleCount} --category "${category}"`;
     
     // Create a new env object with required variables
     const env = {
