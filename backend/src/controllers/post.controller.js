@@ -3,6 +3,9 @@ import { Post } from '../models/Post.js';
 import { Category } from '../models/Category.js';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 const execAsync = promisify(exec);
 export async function listPosts(req, res) {
   const { q } = req.query;
@@ -112,7 +115,9 @@ export async function generateArticle(req, res) {
     const articleCount = Math.min(10, Math.max(1, parseInt(count) || 1));
     
     // Execute the article script with the provided parameters
-    const scriptPath = 'c:/Users/Amish Harsoor/OneDrive/Desktop/New folder/tmw_blog/article_script.py';
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const scriptPath = path.resolve(__dirname, '../../../article_script.py');
     const command = `python "${scriptPath}" "${query}" --count ${articleCount} --category "${category}"`;
     
     const { stdout, stderr } = await execAsync(command, { maxBuffer: 1024 * 1024 * 5 });

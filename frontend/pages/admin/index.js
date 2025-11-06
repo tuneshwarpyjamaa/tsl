@@ -73,69 +73,11 @@ export default function AdminPage() {
     setGeneratedArticles([]);
     
     try {
-      const { data } = await api.post('/posts/generate', { query: articleQuery });
-      if (data.articles && data.articles.length > 0) {
-        setGeneratedArticles(data.articles);
-        setPostSuccess(`${data.articles.length} articles generated successfully!`);
-      } else {
-        setGenerationError('No articles were generated. Please try a different query.');
-      }
-    } catch (error) {
-      console.error('Error generating articles:', error);
-      setGenerationError(error.response?.data?.error || 'Failed to generate articles');
-    } finally {
-      setIsGenerating(false);
-    }
-  }
-
-  async function saveGeneratedArticle(article) {
-    try {
-      setPostLoading(true);
-      setPostError('');
-      setPostSuccess('');
-      
-      // Create a slug from the title
-      const slug = article.title
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 200);
-      
-      // Use the first category or a default one
-      const categorySlug = categories.length > 0 ? categories[0].slug : 'politics';
-      
-      await api.post('/posts', {
-        title: article.title,
-        slug,
-        content: article.content,
-        categorySlug,
-        author: 'AI Writer',
-        image: article.image || ''
+      const { data } = await api.post('/posts/generate', {
+        query: articleQuery,
+        count: articleCount,
+        category: selectedCategory,
       });
-      
-      setPostSuccess('Article saved successfully!');
-      fetchPosts(); // Refresh the posts list
-    } catch (error) {
-      console.error('Error saving article:', error);
-      setPostError(error.response?.data?.error || 'Failed to save article');
-    } finally {
-      setPostLoading(false);
-    }
-  }
-
-  async function generateArticles(e) {
-    e.preventDefault();
-    if (!articleQuery.trim()) {
-      setGenerationError('Please enter a search query');
-      return;
-    }
-    
-    setIsGenerating(true);
-    setGenerationError('');
-    setGeneratedArticles([]);
-    
-    try {
-      const { data } = await api.post('/posts/generate', { query: articleQuery });
       if (data.articles && data.articles.length > 0) {
         setGeneratedArticles(data.articles);
         setPostSuccess(`${data.articles.length} articles generated successfully!`);
@@ -150,6 +92,7 @@ export default function AdminPage() {
     }
   }
 
+
   async function saveGeneratedArticle(article) {
     try {
       setPostLoading(true);
@@ -163,14 +106,11 @@ export default function AdminPage() {
         .replace(/\s+/g, '-')
         .substring(0, 200);
       
-      // Use the first category or a default one
-      const categorySlug = categories.length > 0 ? categories[0].slug : 'politics';
-      
       await api.post('/posts', {
         title: article.title,
         slug,
         content: article.content,
-        categorySlug,
+        categorySlug: selectedCategory, // Use the selected category
         author: 'AI Writer',
         image: article.image || ''
       });
