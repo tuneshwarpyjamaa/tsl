@@ -72,10 +72,15 @@ export default function Navbar() {
 
   const handleSearchSubmit = async (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      // For now, just log the search - you can implement navigation to search results page
-      console.log('Searching for:', searchQuery);
-      // TODO: Navigate to search results page or show results in a modal
+    const query = searchQuery.trim();
+    if (query) {
+      // Navigate to search results page with the search query
+      router.push({
+        pathname: '/search',
+        query: { q: encodeURIComponent(query) }
+      });
+      // Close mobile menu if open
+      setIsMobileMenuOpen(false);
     }
   };
 
@@ -87,23 +92,23 @@ export default function Navbar() {
     <header className="border-b border-gray-300 overflow-x-hidden">
       <div className="container mx-auto px-4">
         {/* Top bar */}
-        <div className="relative flex items-center justify-between py-3">
-          <div className="flex-1 flex items-center">
+        <div className="flex items-center justify-between py-3">
+          <div className="flex items-center flex-1">
             <button 
-              className="focus:outline-none p-2 -ml-2" 
+              className="md:hidden focus:outline-none p-2 -ml-2" 
               onClick={handleMenuClick}
               aria-label="Menu"
             >
               <MenuIcon />
             </button>
-            <form onSubmit={handleSearchSubmit} className="hidden md:block flex-1 max-w-md mx-4">
+            <form onSubmit={handleSearchSubmit} className="hidden md:block ml-4 w-48">
               <div className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search..."
-                  className="px-3 py-1 pr-8 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full px-3 py-1 pr-8 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                 />
                 <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,7 +119,7 @@ export default function Navbar() {
             </form>
           </div>
 
-          <Link href="/" className="absolute left-1/2 transform -translate-x-1/2 text-2xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider hover:text-gray-800 transition-colors">
+          <Link href="/" className="mx-4 text-2xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider hover:text-gray-800 transition-colors whitespace-nowrap">
             <span className="hidden md:inline">The Mandate Wire</span>
             <span className="md:hidden">TMW</span>
           </Link>
@@ -178,17 +183,31 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="border-t border-gray-300 md:hidden">
-          <div className="container mx-auto px-4 py-2">
-            <nav className="flex flex-col gap-4 text-sm font-bold">
-              {navLinks.map(link => (
-                <Link key={link.name} href={link.href} className="hover:underline py-2 border-b border-gray-200">{link.name}</Link>
-              ))}
-            </nav>
-          </div>
+      <div className={`border-t border-gray-300 md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
+        <div className="container mx-auto px-4 py-2">
+          <form onSubmit={handleSearchSubmit} className="mb-4">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search..."
+                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
+              />
+              <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </div>
+          </form>
+          <nav className="flex flex-col gap-4 text-sm font-bold">
+            {navLinks.map(link => (
+              <Link key={link.name} href={link.href} className="hover:underline py-2 border-b border-gray-200">{link.name}</Link>
+            ))}
+          </nav>
         </div>
-      )}
+      </div>
     </header>
   );
 }

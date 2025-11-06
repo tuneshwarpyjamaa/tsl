@@ -6,7 +6,14 @@ import { checkPostOwnership } from '../middleware/post.middleware.js';
 
 const router = Router();
 
+// List posts with optional search
 router.get('/', listPosts);
+
+// Dedicated search endpoint
+router.get('/search', (req, res) => {
+  // This will be handled by the listPosts controller with q parameter
+  return listPosts(req, res);
+});
 router.get('/trending', getTrendingPosts);
 router.get('/:slug', getPost);
 router.post('/', requireAuth, authorize('createPosts'), createPost);
