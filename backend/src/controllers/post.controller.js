@@ -120,7 +120,10 @@ export async function generateArticle(req, res) {
     const scriptPath = path.resolve(__dirname, '../../../article_script.py');
     const command = `python "${scriptPath}" "${query}" --count ${articleCount} --category "${category}"`;
     
-    const { stdout, stderr } = await execAsync(command, { maxBuffer: 1024 * 1024 * 5 });
+    const { stdout, stderr } = await execAsync(command, {
+      maxBuffer: 1024 * 1024 * 5,
+      env: process.env,
+    });
     
     if (stderr) {
       console.error('Error generating article:', stderr);

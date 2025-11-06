@@ -92,7 +92,6 @@ export default function AdminPage() {
     }
   }
 
-
   async function saveGeneratedArticle(article) {
     try {
       setPostLoading(true);
@@ -124,6 +123,7 @@ export default function AdminPage() {
       setPostLoading(false);
     }
   }
+
 
   async function onPdfUpload(e) {
     e.preventDefault();
