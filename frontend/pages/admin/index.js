@@ -68,16 +68,32 @@ export default function AdminPage() {
       return;
     }
     
+    // Check if user is authenticated
+    const token = localStorage.getItem('tmw_token');
+    if (!token) {
+      setGenerationError('Please log in to generate articles');
+      return;
+    }
+    
     setIsGenerating(true);
     setGenerationError('');
     setGeneratedArticles([]);
     
     try {
+      // Make sure the token is set in the headers
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
       const { data } = await api.post('/posts/generate', {
         query: articleQuery,
         count: articleCount,
         category: selectedCategory,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
       });
+      
       if (data.articles && data.articles.length > 0) {
         setGeneratedArticles(data.articles);
         setPostSuccess(`${data.articles.length} articles generated successfully!`);
