@@ -126,34 +126,36 @@ export default function Navbar() {
 
           <div className="flex-1 flex items-center justify-end relative user-menu-container">
             {isAuthenticated ? (
-              <>
-                <div className="mr-8">
-                  <button className="focus:outline-none" onClick={handleUserIconClick}>
-                    <UserIcon />
-                  </button>
-                  {isUserMenuOpen && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
-                      {userRole && String(userRole).toLowerCase() === 'admin' && (
-                        <Link href="/admin" className="block px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100">
-                          Admin
-                        </Link>
-                      )}
-                      <button
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </>
+              <div className="mr-8">
+                <button className="focus:outline-none" onClick={handleUserIconClick}>
+                  <UserIcon />
+                </button>
+                {isUserMenuOpen && (
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+                    {userRole && String(userRole).toLowerCase() === 'admin' && (
+                      <Link href="/admin" className="block px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100">
+                        Admin
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
-              <>
-                <Link href="/register" className="bg-black text-white px-4 py-2 text-sm font-bold hidden md:block">Register</Link>
-                <Link href="/login" className="px-4 py-2 text-sm font-bold border border-gray-400 hidden md:block">Sign In</Link>
+              <div className="flex items-center">
+                <Link href="/register" className="bg-black text-white px-4 py-2 text-sm font-bold hidden md:block hover:bg-gray-800 transition-colors">
+                  Register
+                </Link>
+                <Link href="/login" className="ml-2 px-4 py-2 text-sm font-bold border border-gray-400 hidden md:block hover:bg-gray-50 transition-colors">
+                  Sign In
+                </Link>
                 <button 
-                  className="focus:outline-none p-2 -mr-1" 
+                  className="md:hidden focus:outline-none p-2 -mr-1" 
                   onClick={handleUserIconClick}
                   aria-label="User menu"
                 >
@@ -161,11 +163,23 @@ export default function Navbar() {
                 </button>
                 {isUserMenuOpen && (
                   <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10 md:hidden">
-                    <Link href="/register" className="block px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100">Register</Link>
-                    <Link href="/login" className="block px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100">Sign In</Link>
+                    <Link 
+                      href="/register" 
+                      className="block px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      Register
+                    </Link>
+                    <Link 
+                      href="/login" 
+                      className="block px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      Sign In
+                    </Link>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>
