@@ -43,6 +43,8 @@ jobs:
         npm test
 
     - name: Run Backend Tests
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
       run: |
         cd backend
         npm test
