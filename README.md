@@ -100,6 +100,10 @@ To provide accurate, timely, and insightful reporting on issues that shape our w
 - Main branch protected with required reviews
 - Semantic versioning for releases
 
+### Testing
+- **Backend**: To run the backend tests, navigate to the `backend` directory and run `npm test`.
+- **Frontend**: To run the frontend tests, navigate to the `frontend` directory and run `npm test`.
+
 ### Deployment Process
 - Automated testing on pull requests
 - Staging environment for QA
