@@ -16,6 +16,7 @@ yarn-error.log*
 dist/
 build/
 .next/
+coverage/
 
 # OS generated files
 .DS_Store
