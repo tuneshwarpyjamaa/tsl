@@ -10,6 +10,10 @@ export async function login(email, password) {
   }
 }
 
-export function register(email, password) {
-  return api.post('/auth/register', { email, password }).then(res => res.data);
+export function register(data) {
+  return api.post('/auth/register', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }).then(res => res.data);
 }

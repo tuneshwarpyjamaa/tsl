@@ -10,20 +10,11 @@ import postRoutes from './routes/post.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import userRoutes from './routes/user.routes.js';
 
-// Load .env from the exact path
-const envPath = 'C:\\Users\\Amish Harsoor\\OneDrive\\Desktop\\New folder\\tmw_blog\\.env';
-dotenv.config({ path: envPath });
-
-// Log environment variables for debugging
-console.log('Environment variables loaded from:', envPath);
-console.log('Environment variables:', {
-  hasOpenRouterKey: !!process.env.OPENROUTER_API_KEY,
-  hasNewsApiKey: !!process.env.NEWS_API_KEY,
-  hasDbUrl: !!process.env.DATABASE_URL
-});
+// Load .env file
+dotenv.config();
 
 // Connect to database
-connectDB(process.env.DATABASE_URL).catch(err => {
+connectDB().catch(err => {
   console.error('Database connection failed. Exiting.', err);
   process.exit(1);
 });
@@ -36,6 +27,7 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 app.use(morgan('dev'));
+app.use(express.static('public'));
 
 // Routes
 app.use('/api/auth', authRoutes);

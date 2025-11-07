@@ -47,30 +47,52 @@ export async function login(req, res) {
 
 export async function register(req, res) {
   try {
-    console.log('Register attempt:', { email: req.body.email });
-    const { email, password } = req.body;
-    if (!email || !password) {
-      console.log('Missing email or password');
-      return res.status(400).json({ error: 'Email and password are required' });
+    const {
+      username,
+      email,
+      password,
+      firstName,
+      lastName,
+      displayName,
+      bio,
+      dateOfBirth,
+      websiteUrl,
+    } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'Username, email, and password are required' });
     }
 
-    const existingUser = await User.findByEmail(email).catch(() => null);
-    console.log('Existing user check:', !!existingUser);
-    if (existingUser) {
+    const existingUserByEmail = await User.findByEmail(email).catch(() => null);
+    if (existingUserByEmail) {
       return res.status(409).json({ error: 'User with this email already exists' });
     }
 
-    // Set role in lowercase for consistency
-    const role = email === 'admin@example.com' ? 'admin' : 'member';
-    const user = await User.create({ email, password, role });
-    console.log('User created:', user.email);
+    const existingUserByUsername = await User.findByUsername(username).catch(() => null);
+    if (existingUserByUsername) {
+      return res.status(409).json({ error: 'User with this username already exists' });
+    }
 
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.SECRET_KEY, {
+    const role = email === 'admin@example.com' ? 'admin' : 'member';
+    const user = await User.create({
+      username,
+      email,
+      password,
+      firstName,
+      lastName,
+      displayName,
+      bio,
+      dateOfBirth,
+      websiteUrl,
+      profilePictureUrl: req.file ? `/uploads/${req.file.filename}` : null,
+      role,
+    });
+
+    const token = jwt.sign({ id: user.id, username: user.username, email: user.email, role: user.role }, process.env.SECRET_KEY, {
       expiresIn: '7d'
     });
 
-    console.log('Registration successful for user:', user.email);
-    return res.status(201).json({ token, user: { id: user.id, email: user.email, role: user.role } });
+    return res.status(201).json({ token, user: { id: user.id, username: user.username, email: user.email, role: user.role } });
   } catch (e) {
     console.error('Registration error:', e);
     res.status(500).json({ error: 'Registration failed' });
