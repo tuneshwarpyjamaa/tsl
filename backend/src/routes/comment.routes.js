@@ -3,7 +3,7 @@ import {
   getComments,
   createComment,
 } from '../controllers/comment.controller.js';
-import { requireAuth } from '../middleware/auth.middleware.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router({ mergeParams: true });
 

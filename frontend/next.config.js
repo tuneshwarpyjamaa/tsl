@@ -1,14 +1,23 @@
 const withPWA = require('next-pwa')({
   dest: 'public',
-  disable: false,
+  disable: process.env.NODE_ENV === 'development',
   register: true,
   skipWaiting: true,
 });
 
 module.exports = withPWA({
-  // Your existing Next.js config
+  // Disable Turbopack and use Webpack
+  experimental: {
+    turbo: false
+  },
+  // Modern image configuration
   images: {
-    domains: ['yourdomain.com'], // Add your image domains here
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
     formats: ['image/webp', 'image/avif'],
   },
   async headers() {
