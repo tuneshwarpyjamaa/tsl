@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import api, { setAuthToken } from '@/services/api';
-import { jwtDecode } from 'jwt-decode';
 
 export default function Comments({ postId }) {
   const [comments, setComments] = useState([]);

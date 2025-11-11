@@ -4,7 +4,10 @@ export const getComments = async (req, res) => {
   const { postId } = req.params;
   const client = getClient();
   try {
-    const result = await client.query('SELECT * FROM comments WHERE post_id = $1 ORDER BY created_at ASC', [postId]);
+    const result = await client.query(
+      'SELECT c.*, u.email as author FROM comments c JOIN users u ON c.author_id = u.id WHERE c.post_id = $1 ORDER BY c.created_at ASC',
+      [postId]
+    );
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
