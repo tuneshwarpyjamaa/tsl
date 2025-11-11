@@ -1,5 +1,62 @@
-// components/PostCard.jsx
 import Link from 'next/link';
+
+const PostImage = ({ src, alt, isFeatured = false }) => (
+  <div className={`bg-black mb-4 overflow-hidden ${isFeatured ? 'aspect-video' : 'aspect-[4/3]'}`}>
+    {src ? (
+      <img 
+        src={src} 
+        alt={alt} 
+        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
+        loading={isFeatured ? 'eager' : 'lazy'}
+      />
+    ) : (
+      <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+        <span className="text-white text-sm">No Image</span>
+      </div>
+    )}
+  </div>
+);
+
+const PostTitle = ({ title, isFeatured }) => {
+  const TitleComponent = isFeatured ? 'h1' : 'h2';
+  const sizeClass = isFeatured ? 'text-2xl sm:text-3xl md:text-4xl leading-tight' : 'text-xl sm:text-2xl leading-snug';
+  return (
+    <TitleComponent 
+      className={`font-serif font-bold ${sizeClass} mb-2 hover:underline transition-colors duration-200`}
+      style={{ wordBreak: 'break-word' }}
+    >
+      {title}
+    </TitleComponent>
+  );
+};
+
+const PostMeta = ({ author, date, category }) => {
+  const formattedDate = new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+  
+  return (
+    <div className="text-xs uppercase font-sans tracking-wider text-gray-600 flex flex-wrap items-center gap-x-2 gap-y-1">
+      {category && (
+        <>
+          <span className="font-bold text-black">{category}</span>
+          <span className="text-gray-400">•</span>
+        </>
+      )}
+      <span>By {author}</span>
+      <span className="text-gray-400">•</span>
+      <time dateTime={date} className="whitespace-nowrap">{formattedDate}</time>
+    </div>
+  );
+};
+
+const PostSummary = ({ summary }) => (
+  <p className="text-sm sm:text-base font-sans text-gray-700 my-3 leading-relaxed line-clamp-3">
+    {summary}
+  </p>
+);
 
 const stripHtml = (html) => {
   if (typeof window === 'undefined') return html || '';
@@ -7,120 +64,70 @@ const stripHtml = (html) => {
   return doc.body.textContent || '';
 };
 
-const PostCard = ({ post, variant = 'default' }) => {
-  const categoryName = post.categoryId?.name;
+export default function PostCard({ post, variant = 'default' }) {
+  const summary = stripHtml(post.content).substring(0, 150) + '...';
 
-  if (variant === 'compact') {
-    return (
-      <Link href={`/post/${encodeURIComponent(post.slug)}`} className="group block">
-        {categoryName && (
-          <span className="text-red-600 font-semibold text-xs uppercase tracking-wider mb-1 block">
-            {categoryName}
-          </span>
-        )}
-        <h4 className="font-medium text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2 text-sm leading-tight">
-          {post.title}
-        </h4>
-        <div className="flex items-center text-xs text-gray-500 mt-1">
-          <span>{new Date().toLocaleDateString()}</span>
-        </div>
-      </Link>
-    );
-  }
-
-  if (variant === 'list') {
-    return (
-      <Link href={`/post/${encodeURIComponent(post.slug)}`} className="group block py-3 border-b border-gray-100 last:border-0">
-        {categoryName && (
-          <span className="text-red-600 font-semibold text-xs uppercase tracking-wider mb-1 block">
-            {categoryName}
-          </span>
-        )}
-        <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors mb-1">
-          {post.title}
-        </h3>
-        <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-          {stripHtml(post.content || '').slice(0, 120)}...
-        </p>
-        <div className="flex items-center text-xs text-gray-500">
-          <span>By {post.author || 'Staff Writer'}</span>
-          <span className="mx-2">•</span>
-          <span>{new Date().toLocaleDateString()}</span>
-        </div>
-      </Link>
-    );
-  }
-
-  if (variant === 'featured') {
-    return (
-      <Link href={`/post/${encodeURIComponent(post.slug)}`} className="group block">
-        <div className="bg-gray-200 rounded-lg h-40 mb-3 flex items-center justify-center overflow-hidden">
-          {post.image ? (
-            <img
-              src={post.image}
-              alt={post.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
-          ) : (
-            <div className="text-gray-500 bg-gray-300 w-full h-full flex items-center justify-center">
-              <span>No Image</span>
+  switch (variant) {
+    case 'featured':
+      return (
+        <article className="group">
+          <Link href={`/post/${post.slug}`} className="block">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
+              <div className="order-2 lg:order-1">
+                <div className="mb-1">
+                  <PostMeta author={post.author} date={post.createdAt} category={post.categoryId?.name} />
+                </div>
+                <PostTitle title={post.title} isFeatured={true} />
+                <PostSummary summary={summary} />
+                <span className="inline-block mt-3 text-sm font-medium text-black hover:text-gray-600 transition-colors">
+                  Read more →
+                </span>
+              </div>
+              <div className="order-1 lg:order-2">
+                <PostImage src={post.image} alt={post.title} isFeatured={true} />
+              </div>
             </div>
-          )}
-        </div>
-        {categoryName && (
-          <span className="text-red-600 font-semibold text-xs uppercase tracking-wider mb-1 block">
-            {categoryName}
-          </span>
-        )}
-        <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors mb-2 line-clamp-2">
-          {post.title}
-        </h3>
-        <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-          {stripHtml(post.content || '').slice(0, 100)}...
-        </p>
-        <div className="flex items-center text-xs text-gray-500">
-          <span>{new Date().toLocaleDateString()}</span>
-        </div>
-      </Link>
-    );
+          </Link>
+        </article>
+      );
+
+    case 'side':
+      return (
+        <article className="group">
+          <Link href={`/post/${post.slug}`} className="block hover:bg-gray-50 -mx-2 p-2 rounded-lg transition-colors">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="w-full sm:w-1/3 flex-shrink-0">
+                <PostImage src={post.image} alt={post.title} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-serif font-bold text-lg leading-snug mb-1 group-hover:underline">
+                  {post.title}
+                </h3>
+                <PostMeta author={post.author} date={post.createdAt} category={post.categoryId?.name} />
+              </div>
+            </div>
+          </Link>
+        </article>
+      );
+
+    default:
+      return (
+        <article className="group">
+          <Link href={`/post/${post.slug}`} className="block h-full">
+            <div className="h-full flex flex-col">
+              <div className="mb-3">
+                <PostImage src={post.image} alt={post.title} />
+              </div>
+              <div className="flex-1 flex flex-col">
+                <PostTitle title={post.title} />
+                <PostSummary summary={summary} />
+                <div className="mt-auto pt-2">
+                  <PostMeta author={post.author} date={post.createdAt} category={post.categoryId?.name} />
+                </div>
+              </div>
+            </div>
+          </Link>
+        </article>
+      );
   }
-
-  // Default variant
-  return (
-    <Link href={`/post/${encodeURIComponent(post.slug)}`} className="group block">
-      <div className="bg-gray-200 rounded-lg h-48 mb-4 flex items-center justify-center overflow-hidden">
-        {post.image ? (
-          <img
-            src={post.image}
-            alt={post.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-          />
-        ) : (
-          <div className="text-gray-500 bg-gray-300 w-full h-full flex items-center justify-center">
-            <span>No Image</span>
-          </div>
-        )}
-      </div>
-       {categoryName && (
-        <span className="text-red-600 font-semibold text-xs uppercase tracking-wider mb-1 block">
-          {categoryName}
-        </span>
-      )}
-      <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors mb-2">
-        {post.title}
-      </h3>
-      <p className="text-gray-600 text-sm line-clamp-3 mb-3">
-        {(post.content || '').slice(0, 150)}...
-      </p>
-      <div className="flex items-center text-xs text-gray-500">
-        <span>By {post.author || 'Staff Writer'}</span>
-        <span className="mx-2">•</span>
-        <span>{new Date().toLocaleDateString()}</span>
-      </div>
-    </Link>
-  );
-};
-
-export default PostCard;
+}
