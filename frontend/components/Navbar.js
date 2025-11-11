@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Menu, X, Facebook, Twitter, Instagram } from 'lucide-react';
+import { Menu, X, Facebook, Twitter, Instagram, User } from 'lucide-react';
 import { getUserRole } from '../services/api';
 
 export default function Navbar() {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [currentDateTime, setCurrentDateTime] = useState({ date: '', time: '' });
@@ -151,14 +152,40 @@ export default function Navbar() {
             <div className="text-xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider">
               <Link href="/">The Mandate Wire</Link>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 relative">
               {isAuthenticated ? (
-                <>
-                  {userRole === 'admin' && (
-                    <Link href="/admin" className="hidden md:block text-sm font-bold hover:underline">Admin</Link>
+                <div className="relative">
+                  <button 
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors"
+                    aria-expanded={isUserMenuOpen}
+                    aria-haspopup="true"
+                  >
+                    <User size={24} className="text-gray-700" />
+                  </button>
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
+                      {userRole === 'admin' && (
+                        <Link 
+                          href="/admin" 
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <button 
+                        onClick={() => {
+                          handleLogout();
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
                   )}
-                  <button onClick={handleLogout} className="text-sm font-bold hover:underline">Sign Out</button>
-                </>
+                </div>
               ) : (
                 <>
                   <Link href="/register" className="hidden md:block bg-black text-white px-4 py-2 text-sm font-bold hover:bg-gray-800">Register</Link>
