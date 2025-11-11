@@ -100,6 +100,12 @@ To provide accurate, timely, and insightful reporting on issues that shape our w
 - Main branch protected with required reviews
 - Semantic versioning for releases
 
+### Database Migrations
+- To keep the database schema up to date, run the migration script from the `backend` directory:
+  ```
+  npm run db:migrate
+  ```
+
 ### Testing
 - **Backend**: To run the backend tests, navigate to the `backend` directory and run `npm test`.
 - **Frontend**: To run the frontend tests, navigate to the `frontend` directory and run `npm test`.

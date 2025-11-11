@@ -5,6 +5,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { Facebook, Twitter, Linkedin } from 'lucide-react';
 import PostCard from '@/components/PostCard';
+import Comments from '@/components/Comments';
 
 export default function PostPage() {
   const router = useRouter();
@@ -58,6 +59,23 @@ export default function PostPage() {
       <Head>
         <title>{post.title} | The Mandate Wire</title>
         <meta name="description" content={post.content.substring(0, 160)} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "NewsArticle",
+              "headline": post.title,
+              "image": [post.image],
+              "datePublished": new Date(post.createdAt).toISOString(),
+              "dateModified": new Date(post.updatedAt).toISOString(),
+              "author": [{
+                "@type": "Person",
+                "name": post.author
+              }]
+            })
+          }}
+        />
       </Head>
 
       <article className="max-w-3xl mx-auto">
@@ -96,6 +114,11 @@ export default function PostPage() {
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
       </article>
+
+      {/* Comments Section */}
+      <section className="max-w-3xl mx-auto mt-12">
+        <Comments postId={post.id} />
+      </section>
 
       {/* Related Posts */}
       {relatedPosts.length > 0 && (
