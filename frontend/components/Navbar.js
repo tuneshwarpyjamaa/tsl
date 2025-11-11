@@ -10,6 +10,7 @@ export default function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
   const [currentDateTime, setCurrentDateTime] = useState({ date: '', time: '' });
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -19,8 +20,10 @@ export default function Navbar() {
       if (typeof window !== 'undefined') {
         const token = localStorage.getItem('tmw_token');
         const role = getUserRole();
+        const email = localStorage.getItem('user_email');
         setIsAuthenticated(!!token);
         setUserRole(role);
+        setUserEmail(email);
       }
     };
 
@@ -90,8 +93,10 @@ export default function Navbar() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('tmw_token');
       localStorage.removeItem('user_role');
+      localStorage.removeItem('user_email');
       setIsAuthenticated(false);
       setUserRole(null);
+      setUserEmail(null);
       window.location.href = '/';
     }
   };
@@ -194,16 +199,21 @@ export default function Navbar() {
                   </button>
                   {isUserMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
+                      {userEmail && (
+                        <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-200">
+                          {userEmail}
+                        </div>
+                      )}
                       {userRole === 'admin' && (
-                        <Link 
-                          href="/admin" 
+                        <Link
+                          href="/admin"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           Admin Dashboard
                         </Link>
                       )}
-                      <button 
+                      <button
                         onClick={() => {
                           handleLogout();
                           setIsUserMenuOpen(false);
@@ -281,20 +291,25 @@ export default function Navbar() {
                 <h3 className="text-sm uppercase tracking-wider text-gray-500 px-2 mb-2">Account</h3>
                 {isAuthenticated ? (
                   <div className="space-y-2">
+                    {userEmail && (
+                      <div className="py-3 px-2 text-sm text-gray-500 border-b border-gray-200">
+                        {userEmail}
+                      </div>
+                    )}
                     {userRole === 'admin' && (
-                      <Link 
-                        href="/admin" 
+                      <Link
+                        href="/admin"
                         className="block py-3 px-2 text-lg font-bold hover:bg-gray-100 rounded transition-colors"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         Admin Dashboard
                       </Link>
                     )}
-                    <button 
+                    <button
                       onClick={() => {
                         handleLogout();
                         setIsMobileMenuOpen(false);
-                      }} 
+                      }}
                       className="w-full text-left py-3 px-2 text-lg font-bold text-red-600 hover:bg-red-50 rounded transition-colors"
                     >
                       Sign Out

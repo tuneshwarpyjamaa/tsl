@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { register } from '../services/auth';
+import { setAuthToken } from '../services/api';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -53,7 +54,12 @@ export default function RegisterPage() {
     }
 
     try {
-      await register(data);
+      const { token, user } = await register(data);
+      setAuthToken(token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user_role', user.role);
+        localStorage.setItem('user_email', user.email);
+      }
       window.alert('Sign up successful! Please sign in.');
       router.push('/login');
     } catch (err) {
