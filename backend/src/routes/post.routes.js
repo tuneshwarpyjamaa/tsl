@@ -1,10 +1,14 @@
 import { Router } from 'express';
 import { listPosts, getPost, createPost, updatePost, deletePost, getTrendingPosts, generateArticle } from '../controllers/post.controller.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth } from '../middleware/auth.middleware.js';
 import { authorize } from '../middleware/rbac.js';
 import { checkPostOwnership } from '../middleware/post.middleware.js';
+import commentRoutes from './comment.routes.js';
 
 const router = Router();
+
+// Nested comment routes
+router.use('/:postId/comments', commentRoutes);
 
 // List posts with optional search
 router.get('/', listPosts);
