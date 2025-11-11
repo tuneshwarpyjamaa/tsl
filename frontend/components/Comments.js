@@ -1,17 +1,24 @@
 import { useState, useEffect } from 'react';
 import api, { setAuthToken } from '@/services/api';
+import ConfirmationModal from './modals/ConfirmationModal';
 
 export default function Comments({ postId }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('tmw_token');
+    const userEmail = localStorage.getItem('user_email');
+    const userRole = localStorage.getItem('user_role');
     if (token) {
       setAuthToken(token);
       setIsAuthenticated(true);
+      setCurrentUser({ email: userEmail, role: userRole });
     }
   }, []);
 
@@ -48,6 +55,29 @@ export default function Comments({ postId }) {
     }
   };
 
+  const handleDeleteComment = async () => {
+    if (!commentToDelete) return;
+
+    try {
+      await api.delete(`/posts/${postId}/comments/${commentToDelete.id}`);
+      setComments(comments.filter(comment => comment.id !== commentToDelete.id));
+      setDeleteModalOpen(false);
+      setCommentToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete comment:', error);
+    }
+  };
+
+  const openDeleteModal = (comment) => {
+    setCommentToDelete(comment);
+    setDeleteModalOpen(true);
+  };
+
+  const canDeleteComment = (comment) => {
+    if (!currentUser) return false;
+    return comment.author === currentUser.email || currentUser.role === 'admin';
+  };
+
   return (
     <div className="mt-16">
       <h2 className="text-2xl font-serif font-bold mb-8">Comments</h2>
@@ -76,14 +106,39 @@ export default function Comments({ postId }) {
       <div className="space-y-8">
         {comments.map((comment) => (
           <div key={comment.id} className="border-b-2 border-gray-200 pb-4">
-            <p className="font-bold font-sans">{comment.author}</p>
-            <p className="text-sm text-gray-500 mb-2">
-              {new Date(comment.createdAt).toLocaleDateString()}
-            </p>
-            <p className="font-serif">{comment.content}</p>
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <p className="font-bold font-sans">{comment.author}</p>
+                <p className="text-sm text-gray-500 mb-2">
+                  {new Date(comment.createdAt).toLocaleDateString()}
+                </p>
+                <p className="font-serif">{comment.content}</p>
+              </div>
+              {canDeleteComment(comment) && (
+                <button
+                  onClick={() => openDeleteModal(comment)}
+                  className="text-red-500 hover:text-red-700 text-sm font-medium ml-4"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
+      <ConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteComment}
+        title="Delete Comment"
+        confirmText=""
+        setConfirmText={() => {}}
+        confirmButtonText="Delete"
+        confirmButtonVariant="danger"
+        cancelButtonText="Cancel"
+      >
+        <p>Are you sure you want to delete this comment? This action cannot be undone.</p>
+      </ConfirmationModal>
     </div>
   );
 }

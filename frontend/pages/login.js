@@ -20,6 +20,7 @@ export default function LoginPage() {
       setAuthToken(token);
       if (typeof window !== 'undefined') {
         localStorage.setItem('user_role', user.role);
+        localStorage.setItem('user_email', user.email);
       }
       console.log('Login successful:', { token, user });
       if (String(user.role).toLowerCase() === 'admin') {

@@ -1,20 +1,16 @@
 import Link from 'next/link';
 
 const PostImage = ({ src, alt, isFeatured = false }) => (
-  <div className={`bg-black mb-4 overflow-hidden ${isFeatured ? 'aspect-video' : 'aspect-[4/3]'}`}>
-    {src ? (
-      <img 
-        src={src} 
-        alt={alt} 
-        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
+  src && (
+    <div className={`bg-black mb-4 overflow-hidden ${isFeatured ? 'aspect-video' : 'aspect-[4/3]'}`}>
+      <img
+        src={src}
+        alt={alt}
+        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         loading={isFeatured ? 'eager' : 'lazy'}
       />
-    ) : (
-      <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-        <span className="text-white text-sm">No Image</span>
-      </div>
-    )}
-  </div>
+    </div>
+  )
 );
 
 const PostTitle = ({ title, isFeatured }) => {

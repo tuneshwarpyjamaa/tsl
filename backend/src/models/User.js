@@ -53,7 +53,7 @@ export class User {
   }
 
   static async findById(id) {
-    const query = 'SELECT id, email, role, "createdAt", "updatedAt" FROM users WHERE id = $1';
+    const query = 'SELECT id, username, email, "firstName", "lastName", "displayName", bio, "dateOfBirth", "websiteUrl", "profilePictureUrl", role, "createdAt", "updatedAt" FROM users WHERE id = $1';
     return await db.one(query, [id]);
   }
 
@@ -76,6 +76,46 @@ export class User {
     return await db.one(query, [id, role]);
   }
   
+  static async updateProfile(id, data) {
+    const {
+      username,
+      email,
+      firstName,
+      lastName,
+      displayName,
+      bio,
+      dateOfBirth,
+      websiteUrl,
+    } = data;
+
+    const query = `
+      UPDATE users
+      SET username = COALESCE($2, username),
+          email = COALESCE($3, email),
+          "firstName" = COALESCE($4, "firstName"),
+          "lastName" = COALESCE($5, "lastName"),
+          "displayName" = COALESCE($6, "displayName"),
+          bio = COALESCE($7, bio),
+          "dateOfBirth" = COALESCE($8, "dateOfBirth"),
+          "websiteUrl" = COALESCE($9, "websiteUrl"),
+          "updatedAt" = NOW()
+      WHERE id = $1
+      RETURNING id, username, email, "firstName", "lastName", "displayName", bio, "dateOfBirth", "websiteUrl", role, "createdAt", "updatedAt"
+    `;
+
+    return await db.one(query, [
+      id,
+      username,
+      email,
+      firstName,
+      lastName,
+      displayName,
+      bio,
+      dateOfBirth,
+      websiteUrl,
+    ]);
+  }
+
   static async delete(id) {
     const query = 'DELETE FROM users WHERE id = $1';
     return await db.none(query, [id]);
