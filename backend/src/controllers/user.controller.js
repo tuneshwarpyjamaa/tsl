@@ -14,6 +14,54 @@ export async function getCurrentUser(req, res) {
   }
 }
 
+export async function updateCurrentUser(req, res) {
+  try {
+    const userId = req.user.id;
+    const {
+      username,
+      email,
+      firstName,
+      lastName,
+      displayName,
+      bio,
+      dateOfBirth,
+      websiteUrl,
+    } = req.body;
+
+    // Check if email is being changed and if it's already taken
+    if (email) {
+      const existingUser = await User.findByEmail(email);
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(409).json({ error: 'Email already in use' });
+      }
+    }
+
+    // Check if username is being changed and if it's already taken
+    if (username) {
+      const existingUser = await User.findByUsername(username);
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(409).json({ error: 'Username already in use' });
+      }
+    }
+
+    const updatedUser = await User.updateProfile(userId, {
+      username,
+      email,
+      firstName,
+      lastName,
+      displayName,
+      bio,
+      dateOfBirth,
+      websiteUrl,
+    });
+
+    res.json(updatedUser);
+  } catch (e) {
+    console.error('Update user error:', e);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+}
+
 export async function getAllUsers(req, res) {
   try {
     const users = await User.findAll();
