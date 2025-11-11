@@ -58,11 +58,11 @@ export default function PostCard({ post, variant = 'default' }) {
     case 'side':
       return (
         <Link href={`/post/${post.slug}`}>
-            <div className="flex items-center space-x-4">
-              <div className="w-1/3">
+            <div className="flex flex-col md:flex-row items-center md:space-x-4">
+              <div className="w-full md:w-1/3">
                 <PostImage src={post.image} alt={post.title} />
               </div>
-              <div className="w-2/3">
+              <div className="w-full md:w-2/3 mt-4 md:mt-0">
                 <h3 className="font-serif font-bold text-md hover:underline">{post.title}</h3>
                 <PostMeta author={post.author} date={post.createdAt} category={post.categoryId?.name} />
               </div>
