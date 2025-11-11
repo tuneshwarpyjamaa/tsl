@@ -34,3 +34,33 @@ export const createComment = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const deleteComment = async (req, res) => {
+  const { commentId } = req.params;
+  const userId = req.user.id;
+  const userRole = req.user.role;
+
+  const client = getClient();
+  try {
+    // Check if user is the author or admin
+    const commentResult = await client.query(
+      'SELECT author_id FROM comments WHERE id = $1',
+      [commentId]
+    );
+
+    if (commentResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    const commentAuthorId = commentResult.rows[0].author_id;
+
+    if (commentAuthorId !== userId && userRole !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized to delete this comment' });
+    }
+
+    await client.query('DELETE FROM comments WHERE id = $1', [commentId]);
+    res.json({ message: 'Comment deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
