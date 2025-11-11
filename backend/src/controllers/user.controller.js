@@ -1,5 +1,19 @@
 import { User } from '../models/User.js';
 
+export async function getCurrentUser(req, res) {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    // Remove sensitive information like password
+    const { password, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to retrieve user' });
+  }
+}
+
 export async function getAllUsers(req, res) {
   try {
     const users = await User.findAll();

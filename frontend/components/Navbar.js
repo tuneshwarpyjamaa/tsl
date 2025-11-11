@@ -198,12 +198,19 @@ export default function Navbar() {
                     <User size={24} className="text-gray-700" />
                   </button>
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
+                    <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
                       {userEmail && (
                         <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-200">
                           {userEmail}
                         </div>
                       )}
+                      <Link
+                        href="/account"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        My Profile
+                      </Link>
                       {userRole === 'admin' && (
                         <Link
                           href="/admin"
@@ -296,6 +303,13 @@ export default function Navbar() {
                         {userEmail}
                       </div>
                     )}
+                    <Link
+                      href="/account"
+                      className="block py-3 px-2 text-lg font-bold hover:bg-gray-100 rounded transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      My Profile
+                    </Link>
                     {userRole === 'admin' && (
                       <Link
                         href="/admin"

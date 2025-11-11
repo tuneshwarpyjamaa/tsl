@@ -53,7 +53,7 @@ export class User {
   }
 
   static async findById(id) {
-    const query = 'SELECT id, email, role, "createdAt", "updatedAt" FROM users WHERE id = $1';
+    const query = 'SELECT id, username, email, "firstName", "lastName", "displayName", bio, "dateOfBirth", "websiteUrl", "profilePictureUrl", role, "createdAt", "updatedAt" FROM users WHERE id = $1';
     return await db.one(query, [id]);
   }
 
