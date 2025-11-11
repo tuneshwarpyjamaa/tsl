@@ -75,8 +75,8 @@ export default function CategoryPage() {
           }}
         />
       </Head>
-      <div>
-        <h1 className="text-3xl font-bold border-b pb-4 mb-8">{data.category?.name}</h1>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl md:text-3xl font-bold border-b pb-4 mb-8">{data.category?.name}</h1>
         {data.posts.length === 0 ? (
           <div>No posts yet.</div>
         ) : (

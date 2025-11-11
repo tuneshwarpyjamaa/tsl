@@ -98,7 +98,7 @@ export default function Navbar() {
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
-            <div className="text-3xl font-serif font-bold text-black uppercase tracking-wider">
+            <div className="text-xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider">
               <Link href="/">The Mandate Wire</Link>
             </div>
             <div className="flex items-center space-x-4">
