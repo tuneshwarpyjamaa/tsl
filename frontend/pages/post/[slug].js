@@ -1,10 +1,11 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import api from '@/services/api';
-import Link from 'next/link';
 import Head from 'next/head';
-import SocialShare from '@/components/SocialShare';
-import Sidebar from '@/components/Sidebar';
+import Link from 'next/link';
+import { Facebook, Twitter, Linkedin } from 'lucide-react';
+import PostCard from '@/components/PostCard';
+import Comments from '@/components/Comments';
 
 export default function PostPage() {
   const router = useRouter();
@@ -38,12 +39,8 @@ export default function PostPage() {
     const fetchRelated = async () => {
       try {
         const { data } = await api.get(`/categories/${post.categoryId.slug}/posts`);
-        // Filter out the current post and limit to 4
-        setRelatedPosts(
-          data.filter(p => p.slug !== post.slug).slice(0, 4)
-        );
+        setRelatedPosts(data.posts.filter(p => p.slug !== post.slug).slice(0, 3));
       } catch (e) {
-        // It's okay if this fails, the page can still render
         console.error('Failed to load related posts:', e);
       }
     };
@@ -51,110 +48,89 @@ export default function PostPage() {
     fetchRelated();
   }, [post]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-600">{error}</div>;
+  if (loading) return <div className="text-center py-20">Loading...</div>;
+  if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
   if (!post) return null;
 
-  const postUrl = `https://yourdomain.com/post/${post.slug}`;
-  const postImage = post.image || 'https://yourdomain.com/default-post-image.jpg';
-  const postDescription = (post.content || '').slice(0, 160).replace(/<[^>]*>/g, '');
-  const publishedDate = new Date(post.createdAt).toISOString();
+  const postUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="container mx-auto px-4 py-8">
       <Head>
-        <title>{post.title} | TMW Blog</title>
-        <meta name="description" content={postDescription} />
-        <meta name="keywords" content={`news, blog, ${post.categoryId?.name || 'article'}, TMW`} />
-        <link rel="canonical" href={postUrl} />
-        <meta property="og:type" content="article" />
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={postDescription} />
-        <meta property="og:url" content={postUrl} />
-        <meta property="og:image" content={postImage} />
-        <meta property="article:published_time" content={publishedDate} />
-        <meta property="article:author" content={post.author || 'TMW Blog'} />
-        {post.categoryId && <meta property="article:section" content={post.categoryId.name} />}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={post.title} />
-        <meta name="twitter:description" content={postDescription} />
-        <meta name="twitter:image" content={postImage} />
+        <title>{post.title} | The Mandate Wire</title>
+        <meta name="description" content={post.content.substring(0, 160)} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "BlogPosting",
+              "@type": "NewsArticle",
               "headline": post.title,
-              "description": postDescription,
-              "image": postImage,
-              "datePublished": publishedDate,
-              "author": {
+              "image": [post.image],
+              "datePublished": new Date(post.createdAt).toISOString(),
+              "dateModified": new Date(post.updatedAt).toISOString(),
+              "author": [{
                 "@type": "Person",
-                "name": post.author || "Staff Writer"
-              },
-              "publisher": {
-                "@type": "Organization",
-                "name": "TMW Blog"
-              },
-              "mainEntityOfPage": {
-                "@type": "WebPage",
-                "@id": postUrl
-              }
+                "name": post.author
+              }]
             })
           }}
         />
       </Head>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
-        <article className="col-span-12 md:col-span-8 w-full overflow-hidden">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
-          <div className="flex justify-between items-center text-sm text-gray-600 mb-8 border-b pb-4">
-        <div>
-          <span>{new Date(post.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
-          {post.categoryId?.name && (
-          <>
-            <span className="mx-2">•</span>
-            <Link href={`/category/${post.categoryId.slug}`} className="hover:underline">
-              {post.categoryId.name}
-            </Link>
-          </>
+
+      <article className="max-w-3xl mx-auto">
+        {/* Post Header */}
+        <header className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">{post.title}</h1>
+          <div className="text-sm uppercase font-sans tracking-wider">
+            By {post.author} &bull; {new Date(post.createdAt).toLocaleDateString()}
+          </div>
+        </header>
+
+        {/* Social Share */}
+        <div className="flex items-center space-x-4 border-y-2 border-black py-4 mb-8">
+          <span className="font-bold font-sans text-sm">SHARE</span>
+          <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-75">
+            <Facebook size={20} />
+          </a>
+          <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-75">
+            <Twitter size={20} />
+          </a>
+          <a href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(postUrl)}&title=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-75">
+            <Linkedin size={20} />
+          </a>
+        </div>
+
+        {/* Post Image */}
+        {post.image && (
+          <div className="mb-8">
+            <img src={post.image} alt={post.title} className="w-full h-auto" />
+          </div>
         )}
-        </div>
-        <SocialShare url={postUrl} title={post.title} />
-      </div>
-      {post.image && (
-        <div className="w-full overflow-hidden rounded-lg mb-8">
-          <img 
-            src={post.image} 
-            alt={post.title} 
-            className="w-full h-auto max-w-full" 
-            style={{ maxWidth: '100%', height: 'auto' }}
-          />
-        </div>
-      )}
-      <div 
-        className="prose prose-sm sm:prose-base md:prose-lg max-w-none text-justify"
-        style={{
-          wordWrap: 'break-word',
-          overflowWrap: 'break-word',
-          maxWidth: '100%'
-        }}
-      >
-        <div dangerouslySetInnerHTML={{ __html: post.content }} className="w-full overflow-x-auto" />
-      </div>
+
+        {/* Post Content */}
+        <div
+          className="prose prose-lg max-w-none font-serif"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
+      </article>
+
+      {/* Comments Section */}
+      <section className="max-w-3xl mx-auto mt-12">
+        <Comments postId={post.id} />
+      </section>
+
+      {/* Related Posts */}
       {relatedPosts.length > 0 && (
-          <aside className="mt-12 border-t pt-8">
-            <h2 className="text-2xl font-bold mb-4">Related Stories</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {relatedPosts.map(p => (
-                <PostCard key={p.slug} post={p} variant="featured" />
-              ))}
-            </div>
-          </aside>
-        )}
-        </article>
-        <Sidebar />
-      </div>
+        <aside className="max-w-5xl mx-auto mt-16 border-t-2 border-black pt-8">
+          <h2 className="text-2xl font-serif font-bold mb-8 text-center">More from The Mandate Wire</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {relatedPosts.map(p => (
+              <PostCard key={p.slug} post={p} variant="default" />
+            ))}
+          </div>
+        </aside>
+      )}
     </div>
   );
 }
