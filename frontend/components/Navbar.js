@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { Menu, X, Facebook, Twitter, Instagram, User } from 'lucide-react';
 import { getUserRole } from '../services/api';
@@ -11,6 +11,8 @@ export default function Navbar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [currentDateTime, setCurrentDateTime] = useState({ date: '', time: '' });
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const checkAuthStatus = () => {
@@ -59,9 +61,28 @@ export default function Navbar() {
     updateDateTime();
     const timer = setInterval(updateDateTime, 60000);
 
+    // Handle scroll events for navbar hide/show
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        // Scrolling down
+        setIsNavbarVisible(false);
+      } else if (currentScrollY < lastScrollY.current) {
+        // Scrolling up
+        setIsNavbarVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    // Add scroll event listener
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
     return () => {
       router.events.off('routeChangeComplete', checkAuthStatus);
       clearInterval(timer);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, [router.events]);
 
@@ -95,7 +116,15 @@ export default function Navbar() {
   };
 
   return (
-    <header className="border-b border-black sticky top-0 z-50 bg-white">
+    <header 
+      className={`border-b border-black sticky z-50 bg-white transition-transform duration-300 ease-in-out ${
+        isNavbarVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+      style={{
+        top: 0,
+        transform: isNavbarVisible ? 'translateY(0)' : 'translateY(-100%)'
+      }}
+    >
       {/* Top Bar */}
       <div className="bg-black text-white">
         <div className="container mx-auto px-4 h-10 flex items-center justify-between">
