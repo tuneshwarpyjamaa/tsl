@@ -12,7 +12,7 @@ const PostImage = ({ src, alt }) => (
 
 const PostTitle = ({ title, isFeatured }) => {
   const TitleComponent = isFeatured ? 'h1' : 'h2';
-  const sizeClass = isFeatured ? 'text-4xl' : 'text-2xl';
+  const sizeClass = isFeatured ? 'text-3xl md:text-4xl' : 'text-xl md:text-2xl';
   return (
     <TitleComponent className={`font-serif font-bold ${sizeClass} mb-2 hover:underline`}>
       {title}

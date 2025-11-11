@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="border-t-4 border-black mt-12 py-8 bg-gray-100">
       <div className="container mx-auto px-4">
         <div className="pb-6 border-b border-gray-300">
-          <Link href="/" className="text-3xl font-serif font-bold text-black uppercase tracking-wider hover:text-gray-800 transition-colors">
+          <Link href="/" className="text-2xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider hover:text-gray-800 transition-colors">
             The Mandate Wire
           </Link>
         </div>
