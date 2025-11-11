@@ -6,9 +6,15 @@ const withPWA = require('next-pwa')({
 });
 
 module.exports = withPWA({
-  // Disable Turbopack and use Webpack
+  // Turbopack configuration
   experimental: {
-    turbo: false
+    webpackBuildWorker: true,
+  },
+  // External packages for server components
+  serverExternalPackages: ['puppeteer-core'],
+  // Turbopack configuration to resolve warning
+  turbopack: {
+    // Empty config to resolve warning
   },
   // Modern image configuration
   images: {
