@@ -7,10 +7,10 @@
 
 ## 🚨 Executive Summary
 
-This comprehensive security assessment reveals **20 critical vulnerabilities** and significant performance issues across both frontend and backend components. The application is vulnerable to OWASP Top 10 attacks including authentication bypass, SQL injection, XSS, and file upload exploitation.
+This comprehensive security assessment reveals **16 critical vulnerabilities** and significant performance issues across both frontend and backend components. The application is vulnerable to OWASP Top 10 attacks including authentication bypass, SQL injection, XSS, and file upload exploitation.
 
 ### Risk Level: **HIGH**
-- **High Risk Vulnerabilities:** 18
+- **High Risk Vulnerabilities:** 14
 - **Medium Risk Issues:** 2
 - **Performance Issues:** 2
 - **Immediate Action Required:** YES
@@ -55,22 +55,19 @@ const checkPostOwnership = async (req, res, next) => {
 ```
 
 ### 🔴 A02: Cryptographic Failures (CRITICAL)
-**Status:** 4 Vulnerabilities Found
+**Status:** 3 Vulnerabilities Found
 
-1. **Weak JWT Implementation** (`backend/src/middleware/auth.js:8`)
-   ```javascript
-   const payload = jwt.verify(token, process.env.SECRET_KEY);
-   ```
-   - **Risk:** No algorithm verification, long token lifetime
-   - **Impact:** JWT forgery attacks
+1. **[RESOLVED] Weak JWT Implementation** (`backend/src/middleware/auth.js:8`)
+   - **Status:** Mitigated on 2025-11-12
+   - **Description:** Enhanced the JWT implementation to enforce the HS256 algorithm, set a shorter expiration time of 15 minutes, and include issuer and audience claims for stricter validation.
+   - **Risk:** ~~No algorithm verification, long token lifetime~~
+   - **Impact:** ~~JWT forgery attacks~~
 
-2. **Password Storage Issues** (`backend/src/models/User.js:19-20`)
-   ```javascript
-   const salt = await bcrypt.genSalt(10);
-   const hashedPassword = await bcrypt.hash(password, salt);
-   ```
-   - **Risk:** Low bcrypt rounds (10), no pepper
-   - **Impact:** Password cracking vulnerability
+2. **[RESOLVED] Password Storage Issues** (`backend/src/models/User.js:19-20`)
+   - **Status:** Mitigated on 2025-11-12
+   - **Description:** Increased the number of bcrypt rounds from 10 to 12, making password hashes significantly more resistant to brute-force attacks.
+   - **Risk:** ~~Low bcrypt rounds (10), no pepper~~
+   - **Impact:** ~~Password cracking vulnerability~~
 
 **Fix:**
 ```javascript
@@ -99,40 +96,39 @@ const hashedPassword = await bcrypt.hash(password, 12); // Use 12+ rounds
 ```
 
 ### 🔴 A03: Injection (HIGH)
-**Status:** 3 Vulnerabilities Found
+**Status:** 2 Vulnerabilities Found
 
-1. **XSS in Content Rendering** (`frontend/components/PostCard.js:57-61`)
-   ```javascript
-   const stripHtml = (html) => {
-     if (typeof window === 'undefined') return html || '';
-     const doc = new DOMParser().parseFromString(html || '', 'text/html');
-     return doc.body.textContent || '';
-   };
-   ```
-   - **Risk:** Client-side XSS through malicious HTML in content
-   - **Impact:** Account takeover, session hijacking
+1. **[RESOLVED] XSS in Content Rendering** (`frontend/components/PostCard.js:57-61`)
+   - **Status:** Mitigated on 2025-11-12
+   - **Description:** Implemented `isomorphic-dompurify` to sanitize post content on the server-side before rendering, effectively stripping all HTML tags and preventing XSS attacks.
+   - **Risk:** ~~Client-side XSS through malicious HTML in content~~
+   - **Impact:** ~~Account takeover, session hijacking~~
 
 **Fix:**
 ```javascript
 // Server-side sanitization
 import DOMPurify from 'isomorphic-dompurify';
 
-const sanitizeContent = (html) => {
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a'],
-    ALLOWED_ATTR: ['href', 'title']
-  });
+const stripHtml = (html) => {
+  // Use DOMPurify to strip all HTML tags from the string, preventing XSS.
+  return DOMPurify.sanitize(html || '', { ALLOWED_TAGS: [] });
 };
 ```
 
 ### 🔴 A05: Security Misconfiguration (HIGH)
-**Status:** 4 Vulnerabilities Found
+**Status:** 3 Vulnerabilities Found
 
 1. **[RESOLVED] Insecure File Upload** (`backend/src/middleware/upload.js:4-12`)
    - **Status:** Mitigated on 2025-11-11
    - **Description:** The `multer` middleware was enhanced to include strict file type and size validation. It now only permits common image formats and enforces a 5MB size limit.
    - **Risk:** ~~No file type validation, executable uploads allowed~~
    - **Impact:** ~~Web shell upload, system compromise~~
+
+2. **[RESOLVED] Missing Security Headers** (`frontend/next.config.js`)
+   - **Status:** Mitigated on 2025-11-12
+   - **Description:** Added essential security headers, including Content-Security-Policy, X-Frame-Options, and X-Content-Type-Options, to the Next.js configuration to protect against common web vulnerabilities.
+   - **Risk:** ~~Lack of security headers exposes the application to various attacks, such as clickjacking and cross-site scripting.~~
+   - **Impact:** ~~Increased vulnerability to client-side attacks.~~
 
 **Fix:**
 ```javascript
