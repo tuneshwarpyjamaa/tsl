@@ -6,17 +6,17 @@ import Link from 'next/link';
 
 const HomePageLayout = ({ topStory, latestNews, featuredCategories }) => {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
       <Head>
         <title>The South Line - Latest News and Stories</title>
         <meta name="description" content="Stay updated with the latest news, stories, and analysis from around the world. Unbiased reporting and in-depth coverage from The South Line." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <main className="space-y-12 sm:space-y-16">
+      <main className="space-y-8 sm:space-y-10">
         {/* Top Story */}
         {topStory && (
-          <section className="border-b border-gray-200 pb-8 sm:pb-12">
+          <section className="border-b border-gray-200 pb-6 sm:pb-8">
             <h2 className="sr-only">Top Story</h2>
             <PostCard post={topStory} variant="featured" />
           </section>
@@ -26,10 +26,10 @@ const HomePageLayout = ({ topStory, latestNews, featuredCategories }) => {
           {/* Latest News - Main Content */}
           <div className="lg:col-span-8">
             <div className="mb-8">
-              <h2 className="text-2xl sm:text-3xl font-serif font-bold border-b-2 border-black pb-2 mb-6">
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold border-b-2 border-black pb-2 mb-4">
                 Latest News
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {latestNews.map((post, index) => (
                   <div 
                     key={post.slug} 
@@ -53,7 +53,7 @@ const HomePageLayout = ({ topStory, latestNews, featuredCategories }) => {
           <aside className="lg:col-span-4 space-y-10">
             {featuredCategories.map((category, index) => (
               <div key={category.slug} className={`${index > 0 ? 'pt-6 border-t border-gray-200' : ''}`}>
-                <h3 className="text-xl font-serif font-bold border-b-2 border-black pb-2 mb-4">
+                <h3 className="text-xl font-serif font-bold border-b-2 border-black pb-2 mb-3">
                   <Link 
                     href={`/category/${category.slug}`} 
                     className="hover:underline flex items-center justify-between"
@@ -62,7 +62,7 @@ const HomePageLayout = ({ topStory, latestNews, featuredCategories }) => {
                     <span className="text-sm font-sans font-normal text-gray-500">View all</span>
                   </Link>
                 </h3>
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {category.posts.slice(0, 3).map((post, i) => (
                     <div key={post.slug} className={i > 0 ? 'pt-4 border-t border-gray-100' : ''}>
                       <PostCard post={post} variant="side" />
