@@ -121,163 +121,174 @@ export default function Navbar() {
   };
 
   return (
-    <header 
-      className={`border-b border-black sticky z-50 bg-white transition-transform duration-300 ease-in-out ${
-        isNavbarVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}
-      style={{
-        top: 0,
-        transform: isNavbarVisible ? 'translateY(0)' : 'translateY(-100%)'
-      }}
-    >
-      {/* Top Bar */}
-      <div className="bg-black text-white">
-        <div className="container mx-auto px-4 h-10 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="text-xs font-sans tracking-wider">
-              <span className="hidden sm:inline">{currentDateTime.date}</span>
-              <span className="sm:hidden">
-                {new Date().toLocaleDateString('en-IN', { 
-                  timeZone: 'Asia/Kolkata',
-                  day: 'numeric',
-                  month: 'short',
-                  year: '2-digit'
-                })}
-              </span>
-            </div>
-            <span className="text-xs font-mono bg-gray-800 px-1.5 py-0.5 rounded">
-              {currentDateTime.time} IST
-            </span>
-          </div>
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <form onSubmit={handleSearchSubmit} className="hidden sm:block">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search..."
-                className="bg-black border-b border-white text-white text-xs placeholder-gray-300 focus:outline-none w-24 sm:w-auto"
-              />
-            </form>
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <a href="#" className="hover:text-gray-400 transition-colors" aria-label="Facebook">
-                <Facebook size={16} />
-              </a>
-              <a href="#" className="hover:text-gray-400 transition-colors" aria-label="Twitter">
-                <Twitter size={16} />
-              </a>
-              <a href="#" className="hover:text-gray-400 transition-colors" aria-label="Instagram">
-                <Instagram size={16} />
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Navigation */}
-      <div className="bg-white">
-        <div className="container mx-auto px-4">
-          <div className="h-20 flex items-center justify-between">
-            <div className="md:hidden">
-              <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="focus:outline-none">
-                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-            </div>
-            <div className="flex-1 text-xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider text-center">
-              <Link href="/">The South Line</Link>
-            </div>
-            <div className="flex items-center space-x-4 relative">
-              {isAuthenticated ? (
-                <div className="relative">
-                  <button 
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors"
-                    aria-expanded={isUserMenuOpen}
-                    aria-haspopup="true"
-                  >
-                    <User size={24} className="text-gray-700" />
-                  </button>
-                  {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
-                      {userEmail && (
-                        <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-200">
-                          {userEmail}
-                        </div>
-                      )}
-                      <Link
-                        href="/account"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        My Profile
-                      </Link>
-                      {userRole === 'admin' && (
-                        <Link
-                          href="/admin"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          Admin Dashboard
-                        </Link>
-                      )}
-                      <button
-                        onClick={() => {
-                          handleLogout();
-                          setIsUserMenuOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  )}
+    <div className="relative">
+      <header className="sticky top-0 z-50">
+        <div 
+          className={`border-b border-black bg-white transition-transform duration-300 ease-in-out ${
+            isNavbarVisible ? 'translate-y-0' : '-translate-y-full'
+          }`}
+          style={{
+            transform: isNavbarVisible ? 'translateY(0)' : 'translateY(-100%)',
+            position: 'sticky',
+            top: 0,
+            zIndex: 50
+          }}
+        >
+          {/* Top Bar */}
+          <div className="bg-black text-white">
+            <div className="container mx-auto px-4 h-10 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="text-xs font-sans tracking-wider">
+                  <span className="hidden sm:inline">{currentDateTime.date}</span>
+                  <span className="sm:hidden">
+                    {new Date().toLocaleDateString('en-IN', { 
+                      timeZone: 'Asia/Kolkata',
+                      day: 'numeric',
+                      month: 'short',
+                      year: '2-digit'
+                    })}
+                  </span>
                 </div>
-              ) : <></> }
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop Category Links */}
-      <div className="border-t border-black hidden md:block">
-        <div className="container mx-auto px-4">
-          <nav className="flex items-center justify-center space-x-6 h-12">
-            {navLinks.map(link => (
-              <Link key={link.name} href={link.href} className="text-sm font-bold hover:underline">
-                {link.name}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-black bg-white fixed inset-0 mt-24 overflow-y-auto z-40">
-          <div className="container mx-auto px-4 py-6">
-            <nav className="flex flex-col space-y-6">
-              <form onSubmit={handleSearchSubmit} className="mb-4">
-                <div className="relative">
+                <span className="text-xs font-mono bg-gray-800 px-1.5 py-0.5 rounded">
+                  {currentDateTime.time} IST
+                </span>
+              </div>
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <form onSubmit={handleSearchSubmit} className="hidden sm:block">
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search articles..."
-                    className="w-full px-4 py-3 border-b-2 border-black focus:outline-none focus:border-gray-500 text-base"
+                    placeholder="Search..."
+                    className="bg-black border-b border-white text-white text-xs placeholder-gray-300 focus:outline-none w-24 sm:w-auto"
                   />
-                  <button 
-                    type="submit"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                    aria-label="Search"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                </form>
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <a href="#" className="hover:text-gray-400 transition-colors" aria-label="Facebook">
+                    <Facebook size={16} />
+                  </a>
+                  <a href="#" className="hover:text-gray-400 transition-colors" aria-label="Twitter">
+                    <Twitter size={16} />
+                  </a>
+                  <a href="#" className="hover:text-gray-400 transition-colors" aria-label="Instagram">
+                    <Instagram size={16} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Navigation */}
+          <div className="bg-white">
+            <div className="container mx-auto px-4">
+              <div className="h-20 flex items-center justify-between">
+                <div className="md:hidden">
+                  <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="focus:outline-none">
+                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                   </button>
                 </div>
-              </form>
-              <div className="space-y-1">
+                <div className="flex-1 text-xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider text-center">
+                  <Link href="/">The South Line</Link>
+                </div>
+                <div className="flex items-center space-x-4 relative">
+                  {isAuthenticated ? (
+                    <div className="relative">
+                      <button 
+                        onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                        className="p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors"
+                        aria-expanded={isUserMenuOpen}
+                        aria-haspopup="true"
+                      >
+                        <User size={24} className="text-gray-700" />
+                      </button>
+                      {isUserMenuOpen && (
+                        <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
+                          {userEmail && (
+                            <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-200">
+                              {userEmail}
+                            </div>
+                          )}
+                          <Link
+                            href="/account"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            My Profile
+                          </Link>
+                          {userRole === 'admin' && (
+                            <Link
+                              href="/admin"
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              onClick={() => setIsUserMenuOpen(false)}
+                            >
+                              Admin Dashboard
+                            </Link>
+                          )}
+                          <button
+                            onClick={() => {
+                              handleLogout();
+                              setIsUserMenuOpen(false);
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                          >
+                            Sign Out
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : <></> }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Category Links */}
+          <div className="border-t border-black hidden md:block">
+            <div className="container mx-auto px-4">
+              <nav className="flex items-center justify-center space-x-6 h-12">
                 {navLinks.map(link => (
+                  <Link key={link.name} href={link.href} className="text-sm font-bold hover:underline">
+                    {link.name}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-40">
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <div className="fixed inset-0 top-24 bottom-0 left-0 right-0 bg-white overflow-y-auto z-50">
+            <div className="container mx-auto px-4 py-6">
+              <nav className="flex flex-col space-y-6">
+                <form onSubmit={handleSearchSubmit} className="mb-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search articles..."
+                      className="w-full px-4 py-3 border-b-2 border-black focus:outline-none focus:border-gray-500 text-base"
+                    />
+                    <button 
+                      type="submit"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                      aria-label="Search"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </button>
+                  </div>
+                </form>
+                <div className="space-y-1">
+                  {navLinks.map(link => (
                   <Link 
                     key={link.name} 
                     href={link.href} 
@@ -326,10 +337,11 @@ export default function Navbar() {
                   </div>
                 ) : <></> }
               </div>
-            </nav>
+              </nav>
+            </div>
           </div>
         </div>
       )}
-    </header>
+    </div>
   );
 }
