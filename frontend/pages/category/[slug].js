@@ -40,22 +40,22 @@ export default function CategoryPage() {
   const featuredPost = data.posts[0];
   const otherPosts = data.posts.slice(1);
   const categoryUrl = `https://yourdomain.com/category/${data.category?.slug}`;
-  const categoryDescription = `Read all articles in the ${data.category?.name} category on TMW Blog. Discover the latest news and stories.`;
+  const categoryDescription = `Read all articles in the ${data.category?.name} category on The South Line. Discover the latest news and stories.`;
 
   return (
     <>
       <Head>
-        <title>{data.category?.name} | TMW Blog</title>
+        <title>{data.category?.name} | The South Line</title>
         <meta name="description" content={categoryDescription} />
-        <meta name="keywords" content={`${data.category?.name}, news, blog, articles, TMW`} />
+        <meta name="keywords" content={`${data.category?.name}, news, blog, articles, The South Line`} />
         <link rel="canonical" href={categoryUrl} />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content={`${data.category?.name} | TMW Blog`} />
+        <meta property="og:title" content={`${data.category?.name} | The South Line`} />
         <meta property="og:description" content={categoryDescription} />
         <meta property="og:url" content={categoryUrl} />
         <meta property="og:image" content="https://yourdomain.com/category-og-image.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${data.category?.name} | TMW Blog`} />
+        <meta name="twitter:title" content={`${data.category?.name} | The South Line`} />
         <meta name="twitter:description" content={categoryDescription} />
         <meta name="twitter:image" content="https://yourdomain.com/category-twitter-image.jpg" />
         <script
@@ -69,7 +69,7 @@ export default function CategoryPage() {
               "url": categoryUrl,
               "publisher": {
                 "@type": "Organization",
-                "name": "TMW Blog"
+                "name": "The South Line"
               }
             })
           }}

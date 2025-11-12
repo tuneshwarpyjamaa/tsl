@@ -12,7 +12,7 @@ export default function UsersPage() {
 
   async function fetchUsers() {
     try {
-      const token = localStorage.getItem('tmw_token');
+      const token = localStorage.getItem('southline_token');
       if (token) {
         setAuthToken(token);
       }

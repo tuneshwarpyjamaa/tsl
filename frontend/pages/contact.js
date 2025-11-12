@@ -18,8 +18,8 @@ export default function ContactPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <Head>
-        <title>Contact Us - The Mandate Wire</title>
-        <meta name="description" content="Contact The Mandate Wire" />
+        <title>Contact Us - The South Line</title>
+        <meta name="description" content="Contact The South Line" />
       </Head>
 
       <main>

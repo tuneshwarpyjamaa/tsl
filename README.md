@@ -1,12 +1,12 @@
-# The Mandate Wire - Internal Documentation
+# The South Line - Internal Documentation
 
 ## Company Overview
 
-**The Mandate Wire** is a premier news and media organization dedicated to delivering high-quality, unbiased journalism that informs, engages, and empowers our readers. Founded with the mission to uphold democratic values and provide comprehensive coverage of global events, we strive to be the trusted source for news that matters.
+**The South Line** is a premier news and media organization dedicated to delivering high-quality, unbiased journalism that informs, engages, and empowers our readers. With a focus on comprehensive coverage of global events, we strive to be the trusted source for news that matters, with a special emphasis on stories from the global south.
 
 ## Mission Statement
 
-To provide accurate, timely, and insightful reporting on issues that shape our world, while maintaining the highest standards of journalistic integrity and independence.
+To provide accurate, timely, and insightful reporting on issues that shape our world, particularly those affecting the global south, while maintaining the highest standards of journalistic integrity and independence.
 
 ## Core Values
 
@@ -15,6 +15,7 @@ To provide accurate, timely, and insightful reporting on issues that shape our w
 - **Excellence**: Pursuit of the highest quality in journalism
 - **Innovation**: Embracing new technologies and storytelling methods
 - **Community**: Serving and engaging with our diverse readership
+- **Representation**: Amplifying voices and stories from the global south
 
 ## Organizational Structure
 
@@ -149,14 +150,15 @@ To provide accurate, timely, and insightful reporting on issues that shape our w
 
 ### Internal Communications
 - **Slack**: #general, #editorial, #tech
-- **Email**: internal@themandatewire.com
+- **Email**: internal@thesouthline.com
 - **Wiki**: Internal knowledge base
 
 ### Emergency Contacts
-- **Technical Issues**: tech-support@themandatewire.com
-- **Editorial Issues**: editorial@themandatewire.com
-- **Security Incidents**: security@themandatewire.com
+For urgent matters outside of business hours, please contact:
+
+- **IT Support**: support@thesouthline.com
+- **Editorial Emergencies**: editor@thesouthline.com
+- **Security Issues**: security@thesouthline.com
 
 ---
-
-*This document is for internal use only and contains confidential information about The Mandate Wire's operations, technology, and procedures. Unauthorized distribution is prohibited.*
+*This document is for internal use only and contains confidential information about The South Line's operations, technology, and procedures. Unauthorized distribution is prohibited.*

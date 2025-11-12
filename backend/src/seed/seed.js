@@ -44,8 +44,8 @@ async function run() {
 
     const postsData = [
       {
-        title: 'Welcome to TMW Blog',
-        slug: 'welcome-to-tmw-blog',
+        title: 'Welcome to The South Line',
+        slug: 'welcome-to-the-south-line',
         content: 'This is a sample post. Edit or delete it from the admin dashboard.',
         categoryId: news?.id,
         author: 'Admin'

@@ -1,7 +1,7 @@
 {
-  "name": "TMW Blog",
-  "short_name": "TMW Blog",
-  "description": "A modern blog application",
+  "name": "The South Line",
+  "short_name": "South Line",
+  "description": "The South Line - Latest News and Stories",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

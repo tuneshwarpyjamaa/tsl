@@ -8,8 +8,8 @@ const HomePageLayout = ({ topStory, latestNews, featuredCategories }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
       <Head>
-        <title>The Mandate Wire - Latest News and Stories</title>
-        <meta name="description" content="Stay updated with the latest news, stories, and analysis from around the world. Unbiased reporting and in-depth coverage." />
+        <title>The South Line - Latest News and Stories</title>
+        <meta name="description" content="Stay updated with the latest news, stories, and analysis from around the world. Unbiased reporting and in-depth coverage from The South Line." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 

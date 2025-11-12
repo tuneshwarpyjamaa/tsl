@@ -8,16 +8,16 @@ const api = axios.create({
 export function setAuthToken(token) {
   if (token) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    if (typeof window !== 'undefined') localStorage.setItem('tmw_token', token);
+    if (typeof window !== 'undefined') localStorage.setItem('southline_token', token);
   } else {
     delete api.defaults.headers.common['Authorization'];
-    if (typeof window !== 'undefined') localStorage.removeItem('tmw_token');
+    if (typeof window !== 'undefined') localStorage.removeItem('southline_token');
   }
 }
 
 // Initialize from localStorage on the client
 if (typeof window !== 'undefined') {
-  const saved = localStorage.getItem('tmw_token');
+  const saved = localStorage.getItem('southline_token');
   if (saved) setAuthToken(saved);
 }
 

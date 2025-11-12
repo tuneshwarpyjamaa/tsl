@@ -4,8 +4,8 @@ export default function AboutPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <Head>
-        <title>About Us - The Mandate Wire</title>
-        <meta name="description" content="About The Mandate Wire" />
+        <title>About Us - The South Line</title>
+        <meta name="description" content="About The South Line" />
       </Head>
 
       <main>
@@ -14,7 +14,7 @@ export default function AboutPage() {
         </h1>
         <div className="prose lg:prose-xl">
           <p>
-            Welcome to The Mandate Wire, your trusted source for unbiased news and analysis.
+            Welcome to The South Line, your trusted source for unbiased news and analysis.
           </p>
           <p>
             Our mission is to provide in-depth, factual reporting on the issues that matter most. We believe in the power of information to create a better-informed public.

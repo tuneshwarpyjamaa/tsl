@@ -18,7 +18,7 @@ export default function Navbar() {
   useEffect(() => {
     const checkAuthStatus = () => {
       if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('tmw_token');
+        const token = localStorage.getItem('southline_token');
         const role = getUserRole();
         const email = localStorage.getItem('user_email');
         setIsAuthenticated(!!token);
@@ -91,7 +91,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('tmw_token');
+      localStorage.removeItem('southline_token');
       localStorage.removeItem('user_role');
       localStorage.removeItem('user_email');
       setIsAuthenticated(false);
@@ -184,7 +184,7 @@ export default function Navbar() {
               </button>
             </div>
             <div className="text-xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider">
-              <Link href="/">The Mandate Wire</Link>
+              <Link href="/">The South Line</Link>
             </div>
             <div className="flex items-center space-x-4 relative">
               {isAuthenticated ? (

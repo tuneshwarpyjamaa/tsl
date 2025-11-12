@@ -57,7 +57,7 @@ export default function PostPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <Head>
-        <title>{post.title} | The Mandate Wire</title>
+        <title>{post.title} | The South Line</title>
         <meta name="description" content={post.content.substring(0, 160)} />
         <script
           type="application/ld+json"
@@ -123,7 +123,7 @@ export default function PostPage() {
       {/* Related Posts */}
       {relatedPosts.length > 0 && (
         <aside className="max-w-5xl mx-auto mt-16 border-t-2 border-black pt-8">
-          <h2 className="text-2xl font-serif font-bold mb-8 text-center">More from The Mandate Wire</h2>
+          <h2 className="text-2xl font-serif font-bold mb-8 text-center">More from The South Line</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {relatedPosts.map(p => (
               <PostCard key={p.slug} post={p} variant="default" />

@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         <div className="pb-6 border-b border-gray-300">
           <Link href="/" className="text-2xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider hover:text-gray-800 transition-colors">
-            The Mandate Wire
+            The South Line
           </Link>
         </div>
 
@@ -51,7 +51,7 @@ export default function Footer() {
         </div>
 
         <div className="text-sm text-gray-700 pt-6 border-t border-gray-300 mt-6 text-center">
-          <p>Copyright {new Date().getFullYear()} The Mandate Wire. All rights reserved.</p>
+          <p className="text-sm text-gray-600"> {new Date().getFullYear()} The South Line. All rights reserved.</p>
           <p>Delivering the latest news and analysis with depth.</p>
         </div>
       </div>

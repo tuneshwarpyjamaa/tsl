@@ -4,8 +4,8 @@ export default function PrivacyPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <Head>
-        <title>Privacy Policy - The Mandate Wire</title>
-        <meta name="description" content="Privacy Policy for The Mandate Wire" />
+        <title>Privacy Policy - The South Line</title>
+        <meta name="description" content="Privacy Policy for The South Line" />
       </Head>
 
       <main>
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
         </h1>
         <div className="prose lg:prose-xl">
           <p>
-            This Privacy Policy describes how The Mandate Wire ("we", "us", or "our") collects, uses, and discloses your information.
+            This Privacy Policy describes how The South Line ("we", "us", or "our") collects, uses, and discloses your information.
           </p>
 
           <h2 className="text-2xl font-serif font-bold mt-8">1. Consent</h2>
@@ -49,7 +49,7 @@ export default function PrivacyPage() {
           <p>
             Mr. John Doe
             <br />
-            grievance.officer@themandatewire.com
+            grievance.officer@thesouthline.com
             <br />
             +91 1234567890
           </p>

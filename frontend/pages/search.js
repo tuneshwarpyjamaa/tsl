@@ -35,7 +35,7 @@ export default function SearchResults() {
   return (
     <div className="min-h-screen flex flex-col">
       <Head>
-        <title>Search Results for "{q}" | TMW Blog</title>
+        <title>Search Results for "{q}" | The South Line</title>
         <meta name="description" content={`Search results for "${q}"`} />
       </Head>
       

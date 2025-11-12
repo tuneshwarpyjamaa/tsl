@@ -1,6 +1,6 @@
 # 🔐 Security & Performance Assessment Report
 
-**Application:** TMW Blog Platform  
+**Application:** The South Line Platform  
 **Assessment Date:** 2025-11-11  
 **Assessed By:** Senior Security Engineer  
 **Severity:** HIGH RISK - Multiple Critical Vulnerabilities Identified
@@ -85,8 +85,8 @@ const generateToken = (user) => {
     { 
       algorithm: 'HS256',
       expiresIn: '15m',
-      issuer: 'tmw-blog',
-      audience: 'tmw-blog-users'
+      issuer: 'southline',
+      audience: 'southline-users'
     }
   );
 };
@@ -179,7 +179,7 @@ const upload = multer({
 2. **Token Storage in localStorage** (`frontend/services/api.js:19-22`)
    ```javascript
    if (typeof window !== 'undefined') {
-     const saved = localStorage.getItem('tmw_token');
+     const saved = localStorage.getItem('southline_token');
      if (saved) setAuthToken(saved);
    }
    ```
@@ -509,7 +509,7 @@ const failedLogin = (email, ip) => {
 
 ## 📋 Conclusion
 
-The TMW Blog Platform requires immediate security remediation to prevent potential attacks. With **20 critical vulnerabilities** identified, the application is at high risk of:
+The South Line Platform requires immediate security remediation to prevent potential attacks. With **20 critical vulnerabilities** identified, the application is at high risk of:
 
 - Complete system compromise through role escalation
 - Database exposure via injection attacks

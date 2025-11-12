@@ -29,8 +29,8 @@ export async function login(req, res) {
     }, process.env.SECRET_KEY, {
       algorithm: 'HS256',
       expiresIn: '15m',
-      issuer: 'tmw-blog',
-      audience: 'tmw-blog-users'
+      issuer: 'southline',
+      audience: 'southline-users'
     });
 
     console.log('Login successful for user:', user.email, 'with role:', userRole);
@@ -94,8 +94,8 @@ export async function register(req, res) {
     const token = jwt.sign({ id: user.id, username: user.username, email: user.email, role: user.role }, process.env.SECRET_KEY, {
       algorithm: 'HS256',
       expiresIn: '15m',
-      issuer: 'tmw-blog',
-      audience: 'tmw-blog-users'
+      issuer: 'southline',
+      audience: 'southline-users'
     });
 
     return res.status(201).json({ token, user: { id: user.id, username: user.username, email: user.email, role: user.role } });

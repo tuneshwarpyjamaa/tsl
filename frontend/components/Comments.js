@@ -12,7 +12,7 @@ export default function Comments({ postId }) {
   const [commentToDelete, setCommentToDelete] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('tmw_token');
+    const token = localStorage.getItem('southline_token');
     const userEmail = localStorage.getItem('user_email');
     const userRole = localStorage.getItem('user_role');
     if (token) {
