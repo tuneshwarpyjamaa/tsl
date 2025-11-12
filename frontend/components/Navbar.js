@@ -33,16 +33,16 @@ export default function Navbar() {
     // Update date and time in IST
     const updateDateTime = () => {
       const now = new Date();
-      
+
       // Format date
-      const dateOptions = { 
+      const dateOptions = {
         timeZone: 'Asia/Kolkata',
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
         day: 'numeric'
       };
-      
+
       // Format time
       const timeOptions = {
         timeZone: 'Asia/Kolkata',
@@ -50,10 +50,10 @@ export default function Navbar() {
         minute: '2-digit',
         hour12: true
       };
-      
+
       const formattedDate = new Intl.DateTimeFormat('en-IN', dateOptions).format(now);
       const formattedTime = new Intl.DateTimeFormat('en-IN', timeOptions).format(now);
-      
+
       setCurrentDateTime({
         date: formattedDate,
         time: formattedTime
@@ -67,7 +67,7 @@ export default function Navbar() {
     // Handle scroll events for navbar hide/show
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
         // Scrolling down
         setIsNavbarVisible(false);
@@ -75,19 +75,36 @@ export default function Navbar() {
         // Scrolling up
         setIsNavbarVisible(true);
       }
-      
+
       lastScrollY.current = currentScrollY;
     };
 
     // Add scroll event listener
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
+
     return () => {
       router.events.off('routeChangeComplete', checkAuthStatus);
       clearInterval(timer);
       window.removeEventListener('scroll', handleScroll);
     };
   }, [router.events]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (isMobileMenuOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'auto';
+      }
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        document.body.style.overflow = 'auto';
+      }
+    };
+  }, [isMobileMenuOpen]);
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
@@ -264,7 +281,7 @@ export default function Navbar() {
             className="fixed inset-0 bg-black bg-opacity-50"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="fixed inset-0 top-24 bottom-0 left-0 right-0 bg-white overflow-y-auto z-50">
+          <div className="fixed inset-0 top-30 bottom-0 left-0 right-0 bg-white overflow-y-auto z-50">
             <div className="container mx-auto px-4 py-6">
               <nav className="flex flex-col space-y-6">
                 <form onSubmit={handleSearchSubmit} className="mb-4">
@@ -288,55 +305,17 @@ export default function Navbar() {
                   </div>
                 </form>
                 <div className="space-y-1">
-                  {navLinks.map(link => (
-                  <Link 
-                    key={link.name} 
-                    href={link.href} 
-                    className="block py-3 px-2 text-lg font-bold hover:bg-gray-100 rounded transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-              </div>
-              
-              <div className="border-t border-gray-200 pt-4 mt-4 space-y-4">
-                <h3 className="text-sm uppercase tracking-wider text-gray-500 px-2 mb-2">Account</h3>
-                {isAuthenticated ? (
-                  <div className="space-y-2">
-                    {userEmail && (
-                      <div className="py-3 px-2 text-sm text-gray-500 border-b border-gray-200">
-                        {userEmail}
-                      </div>
-                    )}
+                    {navLinks.map(link => (
                     <Link
-                      href="/account"
+                      key={link.name}
+                      href={link.href}
                       className="block py-3 px-2 text-lg font-bold hover:bg-gray-100 rounded transition-colors"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      My Profile
+                      {link.name}
                     </Link>
-                    {userRole === 'admin' && (
-                      <Link
-                        href="/admin"
-                        className="block py-3 px-2 text-lg font-bold hover:bg-gray-100 rounded transition-colors"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        Admin Dashboard
-                      </Link>
-                    )}
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full text-left py-3 px-2 text-lg font-bold text-red-600 hover:bg-red-50 rounded transition-colors"
-                    >
-                      Sign Out
-                    </button>
-                  </div>
-                ) : <></> }
-              </div>
+                  ))}
+                </div>
               </nav>
             </div>
           </div>
