@@ -48,6 +48,8 @@ const PostMeta = ({ author, date, category }) => {
   );
 };
 
+import DOMPurify from 'isomorphic-dompurify';
+
 const PostSummary = ({ summary }) => (
   <p className="text-sm sm:text-base font-sans text-gray-700 my-3 leading-relaxed line-clamp-3">
     {summary}
@@ -55,9 +57,8 @@ const PostSummary = ({ summary }) => (
 );
 
 const stripHtml = (html) => {
-  if (typeof window === 'undefined') return html || '';
-  const doc = new DOMParser().parseFromString(html || '', 'text/html');
-  return doc.body.textContent || '';
+  // Use DOMPurify to strip all HTML tags from the string, preventing XSS.
+  return DOMPurify.sanitize(html || '', { ALLOWED_TAGS: [] });
 };
 
 export default function PostCard({ post, variant = 'default' }) {
