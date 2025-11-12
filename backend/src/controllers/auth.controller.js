@@ -27,7 +27,10 @@ export async function login(req, res) {
       email: user.email, 
       role: userRole 
     }, process.env.SECRET_KEY, {
-      expiresIn: '7d'
+      algorithm: 'HS256',
+      expiresIn: '15m',
+      issuer: 'tmw-blog',
+      audience: 'tmw-blog-users'
     });
 
     console.log('Login successful for user:', user.email, 'with role:', userRole);
@@ -89,7 +92,10 @@ export async function register(req, res) {
     });
 
     const token = jwt.sign({ id: user.id, username: user.username, email: user.email, role: user.role }, process.env.SECRET_KEY, {
-      expiresIn: '7d'
+      algorithm: 'HS256',
+      expiresIn: '15m',
+      issuer: 'tmw-blog',
+      audience: 'tmw-blog-users'
     });
 
     return res.status(201).json({ token, user: { id: user.id, username: user.username, email: user.email, role: user.role } });
