@@ -183,7 +183,7 @@ export default function Navbar() {
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
-            <div className="text-xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider">
+            <div className="flex-1 text-xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider text-center">
               <Link href="/">The South Line</Link>
             </div>
             <div className="flex items-center space-x-4 relative">
@@ -232,12 +232,7 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-              ) : (
-                <>
-                  <Link href="/register" className="hidden md:block bg-black text-white px-4 py-2 text-sm font-bold hover:bg-gray-800">Register</Link>
-                  <Link href="/login" className="hidden md:block text-sm font-bold hover:underline">Sign In</Link>
-                </>
-              )}
+              ) : <></> }
             </div>
           </div>
         </div>
@@ -329,27 +324,7 @@ export default function Navbar() {
                       Sign Out
                     </button>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    <Link 
-                      href="/register" 
-                      className="block w-full text-center bg-black text-white px-6 py-3 text-base font-bold hover:bg-gray-800 rounded transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Create Account
-                    </Link>
-                    <div className="text-center">
-                      <span className="text-sm text-gray-500">Already have an account? </span>
-                      <Link 
-                        href="/login" 
-                        className="text-sm font-bold hover:underline"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        Sign In
-                      </Link>
-                    </div>
-                  </div>
-                )}
+                ) : <></> }
               </div>
             </nav>
           </div>
