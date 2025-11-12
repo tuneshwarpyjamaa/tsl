@@ -1,17 +1,31 @@
 import Link from 'next/link';
 
-const PostImage = ({ src, alt, isFeatured = false }) => (
-  src && (
-    <div className={`bg-black mb-4 overflow-hidden ${isFeatured ? 'aspect-video' : 'aspect-[4/3]'}`}>
-      <img
-        src={src}
-        alt={alt}
-        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-        loading={isFeatured ? 'eager' : 'lazy'}
-      />
+const PostImage = ({ src, alt, isFeatured = false }) => {
+  const placeholderSvg = `data:image/svg+xml,%3Csvg width='400' height='300' viewBox='0 0 400 300' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='400' height='300' fill='%23F3F4F6'/%3E%3Cpath d='M100 125C100 111.193 111.193 100 125 100H275C288.807 100 300 111.193 300 125V175C300 188.807 288.807 200 275 200H125C111.193 200 100 188.807 100 175V125Z' fill='%E2%80%A6'/%3E%3Ccircle cx='125' cy='125' r='25' fill='%E2%80%A6'/%3E%3Cpath d='M100 175L150 125L200 175L250 125L300 175' stroke='%E2%80%A6' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E`;
+  
+  return (
+    <div className={`bg-gray-100 mb-4 overflow-hidden ${isFeatured ? 'aspect-video' : 'aspect-[4/3]'} flex items-center justify-center`}>
+      {src ? (
+        <img
+          src={src}
+          alt={alt}
+          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          loading={isFeatured ? 'eager' : 'lazy'}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = placeholderSvg;
+          }}
+        />
+      ) : (
+        <img
+          src={placeholderSvg}
+          alt="No image available"
+          className="w-full h-full object-cover opacity-30"
+        />
+      )}
     </div>
-  )
-);
+  );
+};
 
 const PostTitle = ({ title, isFeatured }) => {
   const TitleComponent = isFeatured ? 'h1' : 'h2';

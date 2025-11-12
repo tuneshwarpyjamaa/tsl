@@ -115,13 +115,15 @@ export default function HomePage() {
           api.get('/categories/featured'),
         ]);
 
-        const posts = postsRes.data;
+        const posts = postsRes.data.data || [];
         if (posts.length > 0) {
           setTopStory(posts[0]);
           setLatestNews(posts.slice(1, 7));
         }
 
-        setFeaturedCategories(categoriesRes.data);
+        // Check if categories response has data array or is the array itself
+        const categoriesData = Array.isArray(categoriesRes.data) ? categoriesRes.data : (categoriesRes.data.data || []);
+        setFeaturedCategories(categoriesData);
       } catch (err) {
         setError('Failed to load content.');
         console.error(err);
