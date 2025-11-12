@@ -73,7 +73,7 @@ export async function register(req, res) {
       return res.status(409).json({ error: 'User with this username already exists' });
     }
 
-    const role = email === 'admin@example.com' ? 'admin' : 'member';
+    const role = 'member'; // Prevent admin registration through public endpoint
     const user = await User.create({
       username,
       email,

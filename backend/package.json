@@ -9,6 +9,7 @@
     "start": "node src/index.js",
     "seed": "node src/seed/seed.js",
     "db:migrate": "node src/migrations/run-migration.js",
+    "create:admin": "node src/seed/create-admin.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:push": "prisma db push"
