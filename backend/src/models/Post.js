@@ -11,14 +11,22 @@ export class Post {
     return await db.one(query, [title, slug, content, categoryId, author, image, authorId]);
   }
 
-  static async findAll() {
+  static async findAll({ limit = 10, offset = 0 } = {}) {
     const query = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
       FROM posts p
       LEFT JOIN categories c ON p."categoryId" = c.id
       ORDER BY p."createdAt" DESC
+      LIMIT $1 OFFSET $2
     `;
-    return await db.many(query);
+    const posts = await db.manyOrNone(query, [limit, offset]);
+    return posts;
+  }
+
+  static async countAll() {
+    const query = 'SELECT COUNT(*) FROM posts';
+    const result = await db.one(query);
+    return parseInt(result.count, 10);
   }
 
   static async findRecent(limit = 5) {
@@ -84,14 +92,25 @@ export class Post {
     return await db.none(query, [id]);
   }
 
-  static async search(query) {
+  static async search(query, { limit = 10, offset = 0 } = {}) {
     const searchQuery = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
       FROM posts p
       LEFT JOIN categories c ON p."categoryId" = c.id
       WHERE p.title ILIKE $1 OR p.content ILIKE $1
       ORDER BY p."createdAt" DESC
+      LIMIT $2 OFFSET $3
     `;
-    return await db.many(searchQuery, [`%${query}%`]);
+    return await db.manyOrNone(searchQuery, [`%${query}%`, limit, offset]);
+  }
+
+  static async countSearch(query) {
+    const searchQuery = `
+      SELECT COUNT(*)
+      FROM posts
+      WHERE title ILIKE $1 OR content ILIKE $1
+    `;
+    const result = await db.one(searchQuery, [`%${query}%`]);
+    return parseInt(result.count, 10);
   }
 }
