@@ -23,12 +23,11 @@ This comprehensive security assessment reveals **23 critical vulnerabilities** a
 **Status:** 8 Vulnerabilities Found
 
 **Issues:**
-1. **Role Escalation in Registration** (`backend/src/controllers/auth.controller.js:76`)
-   ```javascript
-   const role = email === 'admin@example.com' ? 'admin' : 'member';
-   ```
-   - **Risk:** Anyone can register with `admin@example.com` to get admin privileges
-   - **Impact:** Complete system compromise
+1. **[RESOLVED] Role Escalation in Registration** (`backend/src/controllers/auth.controller.js:76`)
+   - **Status:** Mitigated on 2025-11-11
+   - **Description:** The hardcoded admin email check was removed. All new user registrations default to the 'member' role. A secure command-line script has been created for admin user creation.
+   - **Risk:** ~~Anyone can register with `admin@example.com` to get admin privileges~~
+   - **Impact:** ~~Complete system compromise~~
 
 2. **Insufficient Permission Checks** (`backend/src/controllers/post.controller.js:75-76`)
    ```javascript
@@ -129,15 +128,11 @@ const sanitizeContent = (html) => {
 ### 🔴 A05: Security Misconfiguration (HIGH)
 **Status:** 5 Vulnerabilities Found
 
-1. **Insecure File Upload** (`backend/src/middleware/upload.js:4-12`)
-   ```javascript
-   const storage = multer.diskStorage({
-     destination: (req, file, cb) => {
-       cb(null, 'public/uploads/');
-     },
-   ```
-   - **Risk:** No file type validation, executable uploads allowed
-   - **Impact:** Web shell upload, system compromise
+1. **[RESOLVED] Insecure File Upload** (`backend/src/middleware/upload.js:4-12`)
+   - **Status:** Mitigated on 2025-11-11
+   - **Description:** The `multer` middleware was enhanced to include strict file type and size validation. It now only permits common image formats and enforces a 5MB size limit.
+   - **Risk:** ~~No file type validation, executable uploads allowed~~
+   - **Impact:** ~~Web shell upload, system compromise~~
 
 **Fix:**
 ```javascript
@@ -179,9 +174,11 @@ const upload = multer({
 ### 🔴 A07: Authentication Failures (MEDIUM)
 **Status:** 3 Vulnerabilities Found
 
-1. **No Rate Limiting on Auth Endpoints**
-   - **Risk:** Brute force attacks on login
-   - **Impact:** Account compromise through password guessing
+1. **[RESOLVED] No Rate Limiting on Auth Endpoints**
+   - **Status:** Mitigated on 2025-11-12
+   - **Description:** Implemented `express-rate-limit` middleware on `/login` and `/register` routes to prevent brute-force attacks.
+   - **Risk:** ~~Brute force attacks on login~~
+   - **Impact:** ~~Account compromise through password guessing~~
 
 2. **Token Storage in localStorage** (`frontend/services/api.js:19-22`)
    ```javascript
@@ -283,19 +280,19 @@ static async findAll(page = 1, limit = 10) {
 ## 🛠️ Immediate Action Items
 
 ### Priority 1 (Fix within 24 hours)
-1. **Fix Role Escalation Vulnerability**
+1. **[COMPLETED] Fix Role Escalation Vulnerability**
    - Remove hardcoded admin email check
    - Implement proper admin creation process
-   - **Estimated Time:** 2 hours
+   - **Actual Time:** 1.5 hours
 
-2. **Implement Rate Limiting**
+2. **[COMPLETED] Implement Rate Limiting**
    - Add rate limiting to all auth endpoints
-   - **Estimated Time:** 1 hour
+   - **Actual Time:** 0.5 hours
 
-3. **Secure File Uploads**
+3. **[COMPLETED] Secure File Uploads**
    - Add file type validation
    - Implement file size limits
-   - **Estimated Time:** 3 hours
+   - **Actual Time:** 1 hour
 
 ### Priority 2 (Fix within 1 week)
 1. **Implement Proper Authentication**
