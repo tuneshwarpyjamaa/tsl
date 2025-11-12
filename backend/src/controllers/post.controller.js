@@ -8,19 +8,39 @@ import { fileURLToPath } from 'url';
 
 const execAsync = promisify(exec);
 export async function listPosts(req, res) {
-  const { q } = req.query;
+  const { q, page = 1, limit = 10 } = req.query;
+  const pageNum = parseInt(page, 10);
+  const limitNum = parseInt(limit, 10);
+  const offset = (pageNum - 1) * limitNum;
+
   let posts;
+  let totalCount;
+
   if (q) {
-    posts = await Post.search(q);
+    posts = await Post.search(q, { limit: limitNum, offset });
+    totalCount = await Post.countSearch(q);
   } else {
-    posts = await Post.findAll();
+    posts = await Post.findAll({ limit: limitNum, offset });
+    totalCount = await Post.countAll();
   }
+
   // Normalize to match previous shape (categoryId -> category)
-  const normalized = posts.map((p) => ({
-    ...p,
-    categoryId: { name: p.category_name, slug: p.category_slug }
-  }));
-  res.json(normalized);
+  const normalized = posts.map((p) => {
+    return {
+      ...p,
+      categoryId: { name: p.category_name, slug: p.category_slug },
+    };
+  });
+
+  res.json({
+    data: normalized,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total: totalCount,
+      totalPages: Math.ceil(totalCount / limitNum),
+    },
+  });
 }
 
 export async function getTrendingPosts(req, res) {
