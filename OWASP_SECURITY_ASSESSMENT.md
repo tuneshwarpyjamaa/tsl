@@ -174,9 +174,11 @@ const upload = multer({
 ### 🔴 A07: Authentication Failures (MEDIUM)
 **Status:** 3 Vulnerabilities Found
 
-1. **No Rate Limiting on Auth Endpoints**
-   - **Risk:** Brute force attacks on login
-   - **Impact:** Account compromise through password guessing
+1. **[RESOLVED] No Rate Limiting on Auth Endpoints**
+   - **Status:** Mitigated on 2025-11-12
+   - **Description:** Implemented `express-rate-limit` middleware on `/login` and `/register` routes to prevent brute-force attacks.
+   - **Risk:** ~~Brute force attacks on login~~
+   - **Impact:** ~~Account compromise through password guessing~~
 
 2. **Token Storage in localStorage** (`frontend/services/api.js:19-22`)
    ```javascript
@@ -283,9 +285,9 @@ static async findAll(page = 1, limit = 10) {
    - Implement proper admin creation process
    - **Actual Time:** 1.5 hours
 
-2. **Implement Rate Limiting**
+2. **[COMPLETED] Implement Rate Limiting**
    - Add rate limiting to all auth endpoints
-   - **Estimated Time:** 1 hour
+   - **Actual Time:** 0.5 hours
 
 3. **[COMPLETED] Secure File Uploads**
    - Add file type validation
