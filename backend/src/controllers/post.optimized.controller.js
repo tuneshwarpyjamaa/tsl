@@ -43,10 +43,10 @@ export async function getCompletePost(req, res) {
       return res.status(404).json({ error: 'Post not found' });
     }
     
-    // Get related posts from same category (limit to 3 for performance)
+    // Get related posts from same category (request 4 to ensure 3 after filtering current post)
     const category = await Category.findBySlug(post.category_slug);
-    const relatedPosts = category ? 
-      await Post.findByCategory(category.id, 3) : [];
+    const relatedPosts = category ?
+      await Post.findByCategory(category.id, 4) : [];
     
     // Filter out the current post and format
     const formattedRelated = relatedPosts
