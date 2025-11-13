@@ -12,7 +12,7 @@ const runMigration = async () => {
     await client.connect();
     console.log('Connected to the database.');
 
-    const filePath = path.join(process.cwd(), 'src', 'migrations', '002_create_comments_table.sql');
+    const filePath = path.join(process.cwd(), 'src', 'migrations', '003_performance_optimization.sql');
     const sql = await fs.readFile(filePath, 'utf-8');
 
     console.log('Running migration script...');

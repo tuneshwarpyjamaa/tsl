@@ -21,10 +21,18 @@ export default function PostPage() {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const { data } = await api.get(`/posts/${encodeURIComponent(slug)}`);
-        setPost(data);
+        // Use optimized endpoint that returns everything in one call
+        const { data } = await api.get(`/posts/optimized/${encodeURIComponent(slug)}`);
+        
+        if (data.success) {
+          setPost(data.data.post);
+          setRelatedPosts(data.data.relatedPosts || []);
+        } else {
+          setError('Post not found');
+        }
       } catch (e) {
-        setError('Post not found');
+        console.error('Error loading post:', e);
+        setError('Failed to load post');
       } finally {
         setLoading(false);
       }
@@ -32,21 +40,6 @@ export default function PostPage() {
 
     fetchPost();
   }, [slug]);
-
-  useEffect(() => {
-    if (!post?.categoryId?.slug) return;
-
-    const fetchRelated = async () => {
-      try {
-        const { data } = await api.get(`/categories/${post.categoryId.slug}/posts`);
-        setRelatedPosts(data.posts.filter(p => p.slug !== post.slug).slice(0, 3));
-      } catch (e) {
-        console.error('Failed to load related posts:', e);
-      }
-    };
-
-    fetchRelated();
-  }, [post]);
 
   if (loading) return <div className="text-center py-20">Loading...</div>;
   if (error) return <div className="text-center py-20 text-red-500">{error}</div>;

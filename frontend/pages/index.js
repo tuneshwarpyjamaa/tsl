@@ -111,11 +111,12 @@ export default function HomePage() {
     const fetchData = async () => {
       try {
         const [postsRes, categoriesRes] = await Promise.all([
-          api.get('/posts'),
+          // Use optimized endpoint for better performance
+          api.get('/posts/optimized/list?limit=8&page=1'),
           api.get('/categories/featured'),
         ]);
 
-        const posts = postsRes.data.data || [];
+        const posts = postsRes.data.data?.posts || [];
         if (posts.length > 0) {
           setTopStory(posts[0]);
           setLatestNews(posts.slice(1, 7));
