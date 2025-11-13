@@ -1,4 +1,5 @@
 import { useEffect, useState, Suspense } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 import api from '@/services/api';
 import PostCard from '@/components/PostCard';
 import Head from 'next/head';
@@ -108,6 +109,16 @@ export default function HomePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    const stripHtml = (html) => {
+      // Use DOMPurify to strip all HTML tags from the string, preventing XSS.
+      return DOMPurify.sanitize(html || '', { ALLOWED_TAGS: [] });
+    };
+
+    const createSummary = (post) => ({
+      ...post,
+      summary: stripHtml(post.content).substring(0, 150) + '...',
+    });
+
     const fetchData = async () => {
       try {
         const [postsRes, categoriesRes] = await Promise.all([
@@ -116,15 +127,21 @@ export default function HomePage() {
           api.get('/categories/featured'),
         ]);
 
-        const posts = postsRes.data.data?.posts || [];
+        const rawPosts = postsRes.data.data?.posts || [];
+        const posts = rawPosts.map(createSummary);
+
         if (posts.length > 0) {
           setTopStory(posts[0]);
           setLatestNews(posts.slice(1, 7));
         }
 
         // Check if categories response has data array or is the array itself
-        const categoriesData = Array.isArray(categoriesRes.data) ? categoriesRes.data : (categoriesRes.data.data || []);
-        setFeaturedCategories(categoriesData);
+        const rawCategories = Array.isArray(categoriesRes.data) ? categoriesRes.data : (categoriesRes.data.data || []);
+        const categoriesWithSummaries = rawCategories.map((category) => ({
+          ...category,
+          posts: category.posts.map(createSummary),
+        }));
+        setFeaturedCategories(categoriesWithSummaries);
       } catch (err) {
         setError('Failed to load content.');
         console.error(err);
