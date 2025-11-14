@@ -32,4 +32,8 @@ export function searchPosts(query) {
   return api.get('/posts', { params: { q: query } });
 }
 
+export function getCategories() {
+  return api.get('/categories');
+}
+
 export default api;

@@ -62,11 +62,17 @@ const PostMeta = ({ author, date, category }) => {
   );
 };
 
-const PostSummary = ({ summary }) => (
-  <p className="text-sm sm:text-base font-sans text-gray-700 my-3 leading-relaxed line-clamp-3">
-    {summary}
-  </p>
-);
+// Ensure HTML tags are not displayed in summaries
+const stripHtml = (html) => (typeof html === 'string' ? html.replace(/<[^>]*>/g, '') : '');
+
+const PostSummary = ({ summary }) => {
+  const text = stripHtml(summary);
+  return (
+    <p className="text-sm sm:text-base font-sans text-gray-700 my-3 leading-relaxed line-clamp-3">
+      {text}
+    </p>
+  );
+};
 
 export default function PostCard({ post, variant = 'default' }) {
   const summary = post.summary;

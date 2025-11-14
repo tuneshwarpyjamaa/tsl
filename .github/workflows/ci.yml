@@ -5,6 +5,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    - cron: '30 3 * * *'  # 3:30 AM UTC daily (9:00 AM IST)
 
 jobs:
   build:
@@ -41,12 +43,34 @@ jobs:
       continue-on-error: true
       run: |
         cd frontend
-        npm test -- --passWithNoTests || echo "No frontend tests found, continuing..."
+        npm test -- --passWithNoTests
 
     - name: Run Backend Tests
       continue-on-error: true
       env:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      run: cd backend && npm test -- --passWithNoTests
+
+  generate-articles:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
       run: |
-        cd backend
-        npm test -- --passWithNoTests || echo "No backend tests found, continuing..."
+        pip install -r requirements.txt
+
+    - name: Run article generation script
+      env:
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      run: |
+        python article_script.py

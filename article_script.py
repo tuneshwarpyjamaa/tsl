@@ -16,11 +16,10 @@ import html
 import json
 from requests.exceptions import JSONDecodeError, RequestException, Timeout
 
-# --- 2. GLOBAL VARIABLES (Will be populated by user input or defaults) ---
-OPENROUTER_API_KEY = None
-# NEWS_API_KEY is no longer needed as NewsAPI fetching is bypassed
-DATABASE_URL = None
-ADMIN_EMAIL_PLACEHOLDER = None
+# --- 2. GLOBAL VARIABLES (Fetched from environment variables) ---
+OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
+DATABASE_URL = os.environ.get('DATABASE_URL')
+ADMIN_EMAIL_PLACEHOLDER = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
 CATEGORY = "news" # Set category to "news" as requested by the user
 # ARTICLE_COUNT is derived from the STATIC_TOPICS list length
 
@@ -57,36 +56,13 @@ STATIC_TOPICS = [
 ]
 
 # Helper function definitions
-def get_user_input():
-    """Prompts the user to enter all necessary credentials and execution parameters."""
-    global OPENROUTER_API_KEY
-    global DATABASE_URL
-    global ADMIN_EMAIL_PLACEHOLDER
-    # global CATEGORY # CATEGORY is now set directly
-
-    # --- Set Default Values ---
-    default_db_url = "postgresql://postgres.euovankvxwzohwkpxrpw:LVzpmjh0VA8wMer1@aws-1-ap-south-1.pooler.supabase.com:6543/postgres"
-    default_admin_email = "admin@example.com"
-
-    print("--- 🔑 Please Enter API Keys and Database Credentials ---")
-
-    # OpenRouter Key (No default, as this was the source of the 401 error)
-    OPENROUTER_API_KEY = input("Enter OpenRouter API Key (required for AI generation): ").strip()
-
-    # Database URL (Default provided, shortened for display)
-    DATABASE_URL = input(
-        f"Enter PostgreSQL Database URL [Default: {default_db_url}]: "
-    ).strip() or default_db_url
-
-    # Admin Email (Default provided)
-    ADMIN_EMAIL_PLACEHOLDER = input(
-        f"Enter Admin User Email [Default: {default_admin_email}]: "
-    ).strip() or default_admin_email
-
-    # print("\n--- ⚙ Please Enter Execution Parameters ---") # This prompt is no longer needed for CATEGORY
-    # CATEGORY = input(f"Enter Article Category (default: news): ").strip() or 'news' # CATEGORY is now set directly
-    print("-" * 50)
-    print(f"Configuration complete. Starting run with {len(STATIC_TOPICS)} article(s).")
+def check_environment():
+    """Check if required environment variables are set."""
+    if not OPENROUTER_API_KEY:
+        raise ValueError("OPENROUTER_API_KEY environment variable is required")
+    if not DATABASE_URL:
+        raise ValueError("DATABASE_URL environment variable is required")
+    print("Environment variables loaded successfully.")
 
 
 def parse_database_url(url):
@@ -294,7 +270,7 @@ def store_in_database(article_data):
 
 if __name__ == "__main__":
 
-    get_user_input()
+    check_environment()
 
     article_count = len(STATIC_TOPICS)
 

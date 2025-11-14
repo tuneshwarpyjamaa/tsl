@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { Menu, X, Facebook, Twitter, Instagram, User } from 'lucide-react';
-import { getUserRole } from '../services/api';
+import { getUserRole, getCategories } from '../services/api';
 
 export default function Navbar() {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function Navbar() {
   const [userEmail, setUserEmail] = useState(null);
   const [currentDateTime, setCurrentDateTime] = useState({ date: '', time: '' });
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+  const [categories, setCategories] = useState([]);
   const lastScrollY = useRef(0);
 
   useEffect(() => {
@@ -29,6 +30,17 @@ export default function Navbar() {
 
     checkAuthStatus();
     router.events.on('routeChangeComplete', checkAuthStatus);
+
+    const fetchCategories = async () => {
+      try {
+        const response = await getCategories();
+        setCategories(response.data);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+
+    fetchCategories();
 
     // Update date and time in IST
     const updateDateTime = () => {
@@ -120,11 +132,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Home', href: '/' },
-    { name: 'News', href: '/category/news' },
-    { name: 'Sports', href: '/category/sports' },
-    { name: 'Business', href: '/category/business' },
-    { name: 'Innovation', href: '/category/innovation' },
-    { name: 'Culture', href: '/category/culture' },
+    ...categories.map(cat => ({ name: cat.name, href: `/category/${cat.slug}` }))
   ];
 
   const [searchQuery, setSearchQuery] = useState('');
