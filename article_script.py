@@ -31,29 +31,66 @@ OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 NEWS_LANGUAGE = "en"
 NEWS_PAGE_SIZE = 100
 
-# --- STATIC INPUT DATA ---
-# This list contains the topics you manually provided, replacing the NewsAPI call.
-STATIC_TOPICS = [
-    "PM Modi Meets Victims of Delhi Car Blast at LNJP Hospital, Vows Culprits Will Not Be Spared",
-    "Bihar Assembly Elections 2025 Conclude; INDIA Bloc Claims 'Clean Sweep' While Exit Polls Project Decisive NDA Majority",
-    "Bihar Registers Highest Voter Turnout Since 1951, With Women Outnumbering Men at the Polls",
-    "Delhi Blast: Arrested Kashmiri Doctor's Job Move Key in Pan-India Terror Plot, Sources Say Red Fort Was Target",
-    "What Bihar Elections 2025 Mean for the INDIA Bloc: A Test Beyond Numbers for Opposition Unity",
-    "EAM Jaishankar Meets Canadian Counterpart Anita Anand on G7 Sidelines, Discusses Rebuilding Bilateral Ties",
-    "Supreme Court Seeks EC's Response to Pleas Against State-wide Identity Register (SIR) Implementation in Tamil Nadu & Bengal",
-    "'Obviously Delirious': India Strongly Trashes Pakistan PM's Allegations Following Terror Attack in Islamabad",
-    "PM Modi Degree Row: Delhi High Court Asks Delhi University to File Reply on Pleas to Condone Delay in Filing Appeals",
-    "Trinamool Congress Demands SIT Probe Into Delhi Car Blast Amid Rising Security Concerns",
-    "Minister Sidhu to Visit India to Deepen Trade Ties, Attend Confederation of Indian Industry Partnership Summit",
-    "What Bihar Election Results Could Mean for BJP, Congress, RJD, JD(U) and Their Top Leaders",
-    "Supreme Court Wants High Court Judges' Ability to Deliver Judgments in Time to Be in Public Domain",
-    "Delhi Enters 'Severe' Pollution Stage, CAQM Imposes Strict Stage-III GRAP Measures Across NCR",
-    "PM Modi Concludes Successful Two-Day Bhutan Visit, Launches Hydroelectric Projects and Expands Bilateral Cooperation",
-    "Jammu and Kashmir Police Raids Over 300 Locations Linked to Banned Jamaat-e-Islami in Major Crackdown",
-    "Navy Chief Begins Five-Day Visit to United States to Strengthen Defence Cooperation",
-    "National Judicial Academy Bhopal Hosts Two-Day National Urban Conclave to Discuss India's Roadmap",
-    "IRCTC Scam Case: Delhi Court Rejects Lalu Prasad Yadav, Wife's Plea Against Day-to-Day Trial"
-]
+# --- DYNAMIC TOPIC GENERATION ---
+# Function to generate 25 unique political news titles for India
+def generate_topics():
+    """Generate 25 unique political news titles for India using AI."""
+    if not OPENROUTER_API_KEY:
+        print("[ERROR] OpenRouter API key is missing. Cannot generate topics.")
+        return []
+
+    system_instruction = (
+        "You are a news editor specializing in Indian politics. Generate 25 unique, realistic, and timely political news headlines for India. "
+        "Focus on current events, elections, government policies, international relations, and political developments. "
+        "Ensure all titles are distinct and not repeated. Provide them as a numbered list from 1 to 25."
+    )
+
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": MODEL_NAME,
+        "messages": [
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": "Generate 25 unique political news headlines for India."}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 1024
+    }
+
+    print("Generating 25 unique political news topics...")
+
+    try:
+        response = requests.post(OPENROUTER_API_URL, headers=headers, json=payload, timeout=30)
+
+        if response.status_code != 200:
+            print(f"[API ERROR] Failed to generate topics: HTTP {response.status_code}")
+            return []
+
+        data = response.json()
+        full_text = data['choices'][0]['message']['content'].strip()
+
+        # Parse the numbered list
+        topics = []
+        for line in full_text.split('\n'):
+            line = line.strip()
+            if line and line[0].isdigit() and '. ' in line:
+                title = line.split('. ', 1)[1].strip()
+                if title:
+                    topics.append(title)
+
+        if len(topics) < 25:
+            print(f"[WARNING] Only generated {len(topics)} topics instead of 25.")
+        else:
+            print(f"Successfully generated {len(topics)} topics.")
+
+        return topics[:25]  # Limit to 25
+
+    except Exception as e:
+        print(f"[ERROR] Failed to generate topics: {e}")
+        return []
 
 # Helper function definitions
 def check_environment():
@@ -272,13 +309,18 @@ if __name__ == "__main__":
 
     check_environment()
 
-    article_count = len(STATIC_TOPICS)
+    TOPICS = generate_topics()
+    article_count = len(TOPICS)
 
-    print(f"\n🔍 Starting article generation for {article_count} static topics.")
+    if article_count == 0:
+        print("No topics generated. Exiting.")
+        exit(1)
+
+    print(f"\n🔍 Starting article generation for {article_count} generated topics.")
     print(f"📊 Generating article(s) in category: {CATEGORY}")
 
-    # 1. Process each static topic
-    for i, topic_string in enumerate(STATIC_TOPICS):
+    # 1. Process each generated topic
+    for i, topic_string in enumerate(TOPICS):
 
         # In this flow, the single topic string acts as both the headline and the summary for the AI
         source_article = {
