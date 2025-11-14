@@ -1,5 +1,4 @@
 import { useEffect, useState, Suspense } from 'react';
-import DOMPurify from 'isomorphic-dompurify';
 import api from '@/services/api';
 import PostCard from '@/components/PostCard';
 import Head from 'next/head';
@@ -109,14 +108,9 @@ export default function HomePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const stripHtml = (html) => {
-      // Use DOMPurify to strip all HTML tags from the string, preventing XSS.
-      return DOMPurify.sanitize(html || '', { ALLOWED_TAGS: [] });
-    };
-
     const createSummary = (post) => ({
       ...post,
-      summary: stripHtml(post.content).substring(0, 150) + '...',
+      summary: (post.content || '').substring(0, 150) + '...',
     });
 
     const fetchData = async () => {
