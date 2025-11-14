@@ -1,37 +1,47 @@
-import { db } from '../lib/db.js';
+import { query, one, many, manyOrNone, any, none } from '../config/db.js';
 import articleCache, { cacheKeys } from '../lib/cache.js';
 
 export class Post {
   static async create(data) {
     const { title, slug, content, categoryId, author = 'Admin', image, authorId } = data;
-    const query = `
+    
+    const queryText = `
       INSERT INTO posts (title, slug, content, "categoryId", author, image, "authorId", "createdAt", "updatedAt")
       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-      RETURNING id, title, slug, content, "categoryId", author, image, "authorId", "createdAt", "updatedAt"
+      RETURNING *
     `;
-    const newPost = await db.one(query, [title, slug, content, categoryId, author, image, authorId]);
     
-    // Fetch category info and cache the new post
-    const categoryQuery = `SELECT name, slug FROM categories WHERE id = $1`;
-    const category = await db.one(categoryQuery, [categoryId]);
-    const postWithCategory = {
-      ...newPost,
-      category_name: category.name,
-      category_slug: category.slug
-    };
+    const newPost = await one(queryText, [title, slug, content, categoryId, author, image, authorId]);
     
-    // Cache the new post and invalidate related cache
-    articleCache.cachePost(postWithCategory);
-    // Clear any cached list views since we have a new post
-    articleCache.delete('posts:list:1:10'); // Clear first page cache
-    articleCache.delete('posts:trending');
+    if (newPost) {
+      // Fetch category info with optimized single query
+      const categoryQuery = `SELECT name, slug FROM categories WHERE id = $1`;
+      const category = await one(categoryQuery, [categoryId]);
+      
+      const postWithCategory = {
+        ...newPost,
+        category_name: category.name,
+        category_slug: category.slug
+      };
+      
+      // Memory-aware caching with size checks
+      const cacheStats = articleCache.getStats();
+      if (cacheStats.activeItems < 800) { // Leave room for other operations
+        articleCache.cachePost(postWithCategory);
+      }
+      
+      // More specific cache invalidation instead of clearing entire lists
+      this.invalidateRelatedCache(postWithCategory);
+      
+      return postWithCategory;
+    }
     
-    return postWithCategory;
+    return newPost;
   }
 
   static async findAll({ limit = 10, offset = 0 } = {}) {
     // Check cache for common queries
-    const cacheKey = cacheKeys.postsList(offset / limit + 1, limit);
+    const cacheKey = cacheKeys.postsList(Math.floor(offset / limit) + 1, limit);
     const cachedPosts = articleCache.get(cacheKey);
     
     if (cachedPosts) {
@@ -39,27 +49,30 @@ export class Post {
       return cachedPosts;
     }
     
-    const query = `
+    const queryText = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
       FROM posts p
       LEFT JOIN categories c ON p."categoryId" = c.id
       ORDER BY p."createdAt" DESC
       LIMIT $1 OFFSET $2
     `;
-    const posts = await db.manyOrNone(query, [limit, offset]);
+    const posts = await manyOrNone(queryText, [limit, offset]);
     
-    // Cache the results
+    // Memory-aware caching
     if (posts && posts.length > 0) {
-      articleCache.set(cacheKey, posts, 2 * 60 * 1000); // 2 minute cache for lists
-      articleCache.cachePostsList(posts); // Cache individual posts
+      const cacheStats = articleCache.getStats();
+      if (cacheStats.activeItems < 900) { // Leave room for list caching
+        articleCache.set(cacheKey, posts, 2 * 60 * 1000); // 2 minute cache for lists
+        articleCache.cachePostsList(posts); // Cache individual posts if space allows
+      }
     }
     
     return posts;
   }
 
   static async countAll() {
-    const query = 'SELECT COUNT(*) FROM posts';
-    const result = await db.one(query);
+    const queryText = 'SELECT COUNT(*) as count FROM posts';
+    const result = await one(queryText);
     return parseInt(result.count, 10);
   }
 
@@ -73,19 +86,22 @@ export class Post {
       return cachedPosts;
     }
     
-    const query = `
+    const queryText = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
       FROM posts p
       LEFT JOIN categories c ON p."categoryId" = c.id
       ORDER BY p."createdAt" DESC
       LIMIT $1
     `;
-    const posts = await db.many(query, [limit]);
+    const posts = await many(queryText, [limit]);
     
-    // Cache the results for 3 minutes
+    // Cache the results for 3 minutes with memory checks
     if (posts && posts.length > 0) {
-      articleCache.set(cacheKey, posts, 3 * 60 * 1000);
-      articleCache.cachePostsList(posts); // Cache individual posts
+      const cacheStats = articleCache.getStats();
+      if (cacheStats.activeItems < 950) {
+        articleCache.set(cacheKey, posts, 3 * 60 * 1000);
+        articleCache.cachePostsList(posts);
+      }
     }
     
     return posts;
@@ -102,34 +118,37 @@ export class Post {
     }
     
     console.log(`Cache miss for post: ${slug}, querying database...`);
-    const query = `
+    const queryText = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
       FROM posts p
       LEFT JOIN categories c ON p."categoryId" = c.id
       WHERE p.slug = $1
     `;
-    const post = await db.one(query, [slug]);
+    const post = await one(queryText, [slug]);
     
-    // Cache the result
+    // Cache the result if space allows
     if (post) {
-      articleCache.cachePost(post);
+      const cacheStats = articleCache.getStats();
+      if (cacheStats.activeItems < 1000) { // Leave room for other operations
+        articleCache.cachePost(post);
+      }
     }
     
     return post;
   }
 
   static async findById(id) {
-    const query = `
+    const queryText = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
       FROM posts p
       LEFT JOIN categories c ON p."categoryId" = c.id
       WHERE p.id = $1
     `;
-    return await db.one(query, [id]);
+    return await one(queryText, [id]);
   }
 
   static async findByCategory(categoryId, limit) {
-    let query = `
+    let queryText = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
       FROM posts p
       LEFT JOIN categories c ON p."categoryId" = c.id
@@ -137,36 +156,46 @@ export class Post {
       ORDER BY p."createdAt" DESC
     `;
     const params = [categoryId];
+    
     if (limit) {
-      query += ' LIMIT $2';
+      queryText += ' LIMIT $2';
       params.push(limit);
     }
-    return await db.many(query, params);
+    
+    return await many(queryText, params);
   }
 
   static async update(id, data) {
     const { title, slug, content, categoryId, author, image } = data;
-    const query = `
+    const queryText = `
       UPDATE posts
       SET title = $1, slug = $2, content = $3, "categoryId" = $4, author = $5, image = $6, "updatedAt" = NOW()
       WHERE id = $7
-      RETURNING id, title, slug, content, "categoryId", author, image, "createdAt", "updatedAt"
+      RETURNING *
     `;
-    const updatedPost = await db.one(query, [title, slug, content, categoryId, author, image, id]);
+    const updatedPost = await one(queryText, [title, slug, content, categoryId, author, image, id]);
     
     if (updatedPost) {
-      // Fetch category info and cache the updated post
+      // Fetch category info
       const categoryQuery = `SELECT name, slug FROM categories WHERE id = $1`;
-      const category = await db.one(categoryQuery, [categoryId]);
+      const category = await one(categoryQuery, [categoryId]);
       const postWithCategory = {
         ...updatedPost,
         category_name: category.name,
         category_slug: category.slug
       };
       
-      // Cache the updated post and invalidate related cache
-      articleCache.cachePost(postWithCategory);
-      articleCache.delete('posts:list:1:10'); // Clear list cache
+      // Memory-aware caching
+      const cacheStats = articleCache.getStats();
+      if (cacheStats.activeItems < 900) {
+        articleCache.cachePost(postWithCategory);
+      }
+      
+      // Specific cache invalidation - only clear if post order changed
+      if (title !== updatedPost.title) {
+        // Title change affects search results
+        articleCache.delete(`search:${updatedPost.slug}:1:10`); // If using search caching
+      }
       
       return postWithCategory;
     }
@@ -175,21 +204,25 @@ export class Post {
   }
 
   static async delete(id) {
-    // First get the post to invalidate cache
+    // Get the post first to clean up related cache entries
     const postToDelete = await this.findById(id);
     
-    const query = 'DELETE FROM posts WHERE id = $1';
-    const result = await db.none(query, [id]);
+    const queryText = 'DELETE FROM posts WHERE id = $1';
+    await none(queryText, [id]);
     
-    // Invalidate cache entries
+    // Memory-aware cache cleanup
     if (postToDelete) {
+      // Delete specific cache entries
       articleCache.delete(cacheKeys.post(postToDelete.slug));
       articleCache.delete(cacheKeys.postById(id));
-      articleCache.delete('posts:list:1:10'); // Clear list cache
-      articleCache.delete('posts:trending');
+      
+      // Only clear list cache if this was a recent post (affects ordering)
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      if (new Date(postToDelete.createdAt) > twentyFourHoursAgo) {
+        articleCache.delete('posts:list:1:10'); // Clear first page cache
+        articleCache.delete('posts:trending:5'); // Clear trending cache
+      }
     }
-    
-    return result;
   }
 
   static async search(query, { limit = 10, offset = 0 } = {}) {
@@ -201,16 +234,78 @@ export class Post {
       ORDER BY p."createdAt" DESC
       LIMIT $2 OFFSET $3
     `;
-    return await db.manyOrNone(searchQuery, [`%${query}%`, limit, offset]);
+    return await manyOrNone(searchQuery, [`%${query}%`, limit, offset]);
   }
 
   static async countSearch(query) {
     const searchQuery = `
-      SELECT COUNT(*)
+      SELECT COUNT(*) as count
       FROM posts
       WHERE title ILIKE $1 OR content ILIKE $1
     `;
-    const result = await db.one(searchQuery, [`%${query}%`]);
+    const result = await one(searchQuery, [`%${query}%`]);
     return parseInt(result.count, 10);
+  }
+
+  /**
+   * Smart cache invalidation that only clears affected entries
+   * This prevents the broad cache clearing that was causing performance issues
+   */
+  static invalidateRelatedCache(post) {
+    try {
+      // Only clear list cache for recent posts that might affect page 1
+      const recentThreshold = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days
+      if (new Date(post.createdAt) > recentThreshold) {
+        articleCache.delete('posts:list:1:10');
+        
+        // Clear trending cache for very recent posts
+        const dayThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        if (new Date(post.createdAt) > dayThreshold) {
+          articleCache.delete('posts:trending:5');
+        }
+      }
+      
+      // Clear category-specific caches if relevant
+      if (post.category_slug) {
+        articleCache.delete(`post_list:${post.category_slug}:1:10`);
+      }
+      
+    } catch (error) {
+      console.warn('Error during cache invalidation:', error.message);
+      // Don't let cache invalidation errors break the main operation
+    }
+  }
+
+  /**
+   * Get post statistics for monitoring
+   */
+  static async getStats() {
+    const totalQuery = 'SELECT COUNT(*) as count FROM posts';
+    const recentQuery = `
+      SELECT COUNT(*) as count 
+      FROM posts 
+      WHERE "createdAt" > NOW() - INTERVAL '24 hours'
+    `;
+    const categoryQuery = `
+      SELECT c.name, COUNT(p.id) as count
+      FROM categories c
+      LEFT JOIN posts p ON c.id = p."categoryId"
+      GROUP BY c.id, c.name
+      ORDER BY count DESC
+      LIMIT 5
+    `;
+    
+    const [total, recent, topCategories] = await Promise.all([
+      one(totalQuery),
+      one(recentQuery),
+      many(categoryQuery)
+    ]);
+    
+    return {
+      total: parseInt(total.count, 10),
+      recent24h: parseInt(recent.count, 10),
+      topCategories,
+      cacheStats: articleCache.getStats()
+    };
   }
 }

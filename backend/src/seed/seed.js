@@ -21,14 +21,16 @@ async function run() {
     }
 
     const categoriesData = [
-      { name: 'News', slug: 'news' },
-      { name: 'Sport', slug: 'sport' },
-      { name: 'Business', slug: 'business' },
-      { name: 'Innovation', slug: 'innovation' },
-      { name: 'Culture', slug: 'culture' },
-      { name: 'Arts', slug: 'arts' },
+      { name: 'Technology', slug: 'technology' },
       { name: 'Travel', slug: 'travel' },
-      { name: 'Earth', slug: 'earth' }
+      { name: 'Culture', slug: 'culture' },
+      { name: 'News', slug: 'news' },
+      { name: 'Sports', slug: 'sports' },
+      { name: 'Arts', slug: 'arts' },
+      { name: 'Sport', slug: 'sport' },
+      { name: 'Earth', slug: 'earth' },
+      { name: 'Business', slug: 'business' },
+      { name: 'Innovation', slug: 'innovation' }
     ];
 
     for (const cat of categoriesData) {
