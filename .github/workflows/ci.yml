@@ -7,6 +7,7 @@ on:
     branches: [ main ]
   schedule:
     - cron: '30 3 * * *'  # 3:30 AM UTC daily (9:00 AM IST)
+  workflow_dispatch:
 
 jobs:
   build:
@@ -53,7 +54,7 @@ jobs:
 
   generate-articles:
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     steps:
     - uses: actions/checkout@v3
