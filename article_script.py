@@ -26,7 +26,7 @@ CATEGORY = "news" # Set category to "news" as requested by the user
 # Configuration (Constants)
 # Using the user-requested model and explicitly specifying the API endpoint
 # UPDATED FIX: Changed model name to the user-requested x-ai/grok-4-fast.
-MODEL_NAME = "x-ai/grok-4-fast"
+MODEL_NAME = "moonshotai/kimi-k2:free"
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 NEWS_LANGUAGE = "en"
 NEWS_PAGE_SIZE = 100
