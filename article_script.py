@@ -40,7 +40,7 @@ def generate_topics():
         return []
 
     system_instruction = (
-        "You are a news editor specializing in Indian politics. Generate 25 unique, realistic, and latest(previous day) political news headlines for India. "
+        "You are a news editor specializing in Indian politics. Generate 25 unique, realistic, and latest(from previous day up until this exact second) political news headlines for India. "
         "Focus on current events, elections, government policies, international relations, and political developments. "
         "Ensure all titles are distinct and not repeated. Provide them as a numbered list from 1 to 25."
     )
