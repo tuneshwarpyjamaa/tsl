@@ -10,20 +10,27 @@ let pool = null;
 export async function connectDB() {
   const uri = process.env.DATABASE_URL;
   if (!uri) {
+    console.error('DATABASE_URL environment variable is not set');
     throw new Error('DATABASE_URL is not set');
   }
-  
+
+  console.log('Connecting to database...');
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('Database URI starts with:', uri.substring(0, 20) + '...');
+
   // Create connection pool with optimal settings
   pool = new Pool({
     connectionString: uri,
     max: 15, // Maximum number of clients in the pool
     min: 2,  // Minimum number of clients in the pool
     idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-    connectionTimeoutMillis: 5000, // Return an error after 5 seconds if connection could not be established
-    ssl: process.env.NODE_ENV === 'production' ? { 
-      rejectUnauthorized: false 
+    connectionTimeoutMillis: 10000, // Increased to 10 seconds for better reliability
+    ssl: process.env.NODE_ENV === 'production' ? {
+      rejectUnauthorized: false
     } : false,
-    application_name: 'tmw_blog_app'
+    application_name: 'tmw_blog_app',
+    statement_timeout: 30000, // 30 second statement timeout
+    query_timeout: 30000 // 30 second query timeout
   });
 
   // Handle pool errors to prevent crashes
@@ -66,12 +73,12 @@ export async function query(text, params) {
   try {
     const result = await pool.query(text, params);
     const duration = Date.now() - start;
-    
+
     // Log slow queries for performance monitoring
     if (duration > 1000) {
       console.log(`Slow query detected: ${duration}ms - ${text.substring(0, 100)}...`);
     }
-    
+
     return result;
   } catch (error) {
     console.error('Database query error:', error);
@@ -141,7 +148,7 @@ export function getPoolStats() {
   if (!pool) {
     return { error: 'Pool not initialized' };
   }
-  
+
   return {
     totalCount: pool.totalCount,
     idleCount: pool.idleCount,
@@ -194,12 +201,12 @@ if (typeof process !== 'undefined') {
     console.log('Received SIGTERM, closing database connections...');
     await closeDB();
   });
-  
+
   process.on('SIGINT', async () => {
     console.log('Received SIGINT, closing database connections...');
     await closeDB();
   });
-  
+
   process.on('exit', async () => {
     console.log('Process exiting, closing database connections...');
     await closeDB();

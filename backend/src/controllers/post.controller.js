@@ -1,12 +1,6 @@
 import slugify from 'slugify';
 import { Post } from '../models/Post.js';
 import { Category } from '../models/Category.js';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const execAsync = promisify(exec);
 export async function listPosts(req, res) {
   const { q, page = 1, limit = 10 } = req.query;
   const pageNum = parseInt(page, 10);
@@ -84,7 +78,7 @@ export async function updatePost(req, res) {
     const { id } = req.params;
     const { title, slug, content, categorySlug, author, image } = req.body;
     const data = { title, slug, content, author, image };
-    
+
     if (!slug) {
       return res.status(400).json({ error: 'Slug is required' });
     }
@@ -128,125 +122,43 @@ export async function deletePost(req, res) {
 }
 
 export async function generateArticle(req, res) {
+  // 🧹 PYTHON GENERATION REMOVED TO ELIMINATE MEMORY LEAKS
+  // This function previously spawned Python processes that caused memory leaks
+
   try {
     const { query, count = 1, category = 'news' } = req.body;
-    
+
     if (!query) {
       return res.status(400).json({ error: 'Query parameter is required' });
     }
 
-    // Validate count is between 1 and 10
-    const articleCount = Math.min(10, Math.max(1, parseInt(count) || 1));
-    
-    // Execute the article script with the provided parameters
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const scriptPath = path.resolve(__dirname, '../../../article_script.py');
-    const command = `python3 "${scriptPath}" "${query}" --count ${articleCount} --category "${category}"`;
-    
-    // Create a new env object with required variables
-    const env = {
-      ...process.env,
-      PATH: process.env.PATH, // Keep the existing PATH
-      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
-      NEWS_API_KEY: process.env.NEWS_API_KEY,
-      DATABASE_URL: process.env.DATABASE_URL
-    };
-    
-    console.log('Executing command:', command);
-    console.log('Environment variables:', {
-      hasOpenRouterKey: !!env.OPENROUTER_API_KEY,
-      hasNewsApiKey: !!env.NEWS_API_KEY,
-      hasDbUrl: !!env.DATABASE_URL
+    console.log('🧹 Python generation endpoint accessed but disabled for memory safety');
+    console.log('Query:', query);
+    console.log('Category:', category);
+
+    // Return a helpful response instead of spawning Python processes
+    return res.status(410).json({
+      error: 'Article generation has been disabled',
+      details: 'Python-based article generation has been permanently removed to eliminate memory leaks.',
+      message: 'This feature previously caused browser crashes due to memory leaks.',
+      alternative: 'Please create articles manually through the admin panel at /admin',
+      instructions: [
+        '1. Go to /admin in your browser',
+        '2. Navigate to Posts section',
+        '3. Click "Create New Post"',
+        '4. Fill in title, content, and category',
+        '5. Save your article'
+      ],
+      query: query,
+      category: category
     });
 
-    let stdout, stderr;
-    try {
-      const result = await execAsync(command, {
-        maxBuffer: 1024 * 1024 * 10,
-        env: env,
-        shell: true,
-        cwd: path.resolve(__dirname, '../../../') // Run from project root
-      });
-      stdout = result.stdout;
-      stderr = result.stderr;
-      
-      console.log('Command output:', stdout);
-      if (stderr) {
-        console.error('Command stderr:', stderr);
-      }
-    } catch (error) {
-      console.error('Command execution failed:', {
-        error: error.message,
-        stdout: error.stdout,
-        stderr: error.stderr,
-        code: error.code,
-        signal: error.signal
-      });
-      return res.status(500).json({ 
-        error: 'Failed to execute article generation script', 
-        details: error.message,
-        stdout: error.stdout,
-        stderr: error.stderr
-      });
-    }
-    
-    // Parse the output to get the generated articles
-    let articles = [];
-    try {
-      // First, check if the script output indicates success
-      if (stdout.includes('Article stored in database:')) {
-        // Extract the article title from the success message
-        const titleMatch = stdout.match(/Article stored in database: (.+)/);
-        const title = titleMatch ? titleMatch[1].trim() : 'Generated Article';
-        
-        // Create a simple article object with the title
-        articles.push({
-          title: title,
-          content: 'Article has been generated and stored in the database.',
-          success: true
-        });
-      } else if (stdout.includes('No articles were generated')) {
-        return res.status(404).json({ 
-          error: 'No articles were generated',
-          details: 'The article generation process completed but no articles were created.'
-        });
-      } else {
-        // Try to parse any JSON output as a fallback
-        const jsonMatch = stdout.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          try {
-            const articleData = JSON.parse(jsonMatch[0]);
-            articles.push(articleData);
-          } catch (e) {
-            console.error('Error parsing JSON output:', e);
-          }
-        }
-      }
-      
-      if (articles.length === 0) {
-        return res.status(500).json({ 
-          error: 'Could not parse article output',
-          details: 'The article generation process did not produce any parsable output.',
-          rawOutput: stdout
-        });
-      }
-      
-      res.json({ success: true, articles });
-      
-    } catch (error) {
-      console.error('Error processing article output:', error);
-      res.status(500).json({ 
-        error: 'Error processing generated articles', 
-        details: error.message,
-        rawOutput: stdout
-      });
-    }
   } catch (error) {
-    console.error('Failed to generate article:', error);
-    res.status(500).json({ 
-      error: 'Failed to generate article', 
-      details: error.message 
+    console.error('Error in generateArticle endpoint:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error.message,
+      note: 'This endpoint now simply returns an error message to prevent memory leaks'
     });
   }
 }

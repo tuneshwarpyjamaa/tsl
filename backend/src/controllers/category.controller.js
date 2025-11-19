@@ -2,8 +2,16 @@ import { Category } from '../models/Category.js';
 import { Post } from '../models/Post.js';
 
 export async function listCategories(_req, res) {
-  const categories = await Category.findAll();
-  res.json(categories);
+  try {
+    const categories = await Category.findAll();
+    res.json(categories || []);
+  } catch (error) {
+    console.error('Error in listCategories:', error);
+    res.status(500).json({
+      error: 'Failed to load categories',
+      details: error.message
+    });
+  }
 }
 
 export async function getPostsByCategory(req, res) {
@@ -19,24 +27,71 @@ export async function getPostsByCategory(req, res) {
 }
 
 export async function getFeaturedCategories(req, res) {
-  const featuredSlugs = ['technology', 'world-news', 'business']; // Example slugs
-  const categories = await Promise.all(
-    featuredSlugs.map(slug => Category.findBySlug(slug))
-  );
+  try {
+    // Dynamic approach: Get any available categories instead of hardcoded slugs
+    const categories = await Category.findAll();
 
-  const featuredData = await Promise.all(
-    categories.map(async (cat) => {
-      if (!cat) return null;
-      const posts = await Post.findByCategory(cat.id, 5); // Limit to 5 posts
+    if (!categories || categories.length === 0) {
+      console.log('No categories found in database');
+      return res.json([]);
+    }
+
+    // Take first 3 categories as "featured" if specific ones don't exist
+    const featuredCategories = categories.slice(0, 3);
+
+    const categoryMap = new Map(featuredCategories.map(c => [c.id, c]));
+    const categoryIds = Array.from(categoryMap.keys());
+
+    // Get the latest 5 posts for all those categories
+    let posts = [];
+    try {
+      posts = await Post.findLatestForCategories(categoryIds, 5);
+    } catch (error) {
+      console.warn('Post.findLatestForCategories failed, trying alternative:', error.message);
+      // Fallback: get latest posts for each category individually
+      posts = [];
+      for (const category of featuredCategories) {
+        try {
+          const categoryPosts = await Post.findByCategory(category.id, 5);
+          posts.push(...categoryPosts.map(p => ({ ...p, category_id: category.id })));
+        } catch (categoryError) {
+          console.warn(`Failed to get posts for category ${category.name}:`, categoryError.message);
+        }
+      }
+    }
+
+    // Group the posts by category_id client-side
+    const postsByCategory = posts.reduce((acc, post) => {
+      if (!acc[post.category_id]) {
+        acc[post.category_id] = [];
+      }
+      acc[post.category_id].push(post);
+      return acc;
+    }, {});
+
+    // Build the response object in the correct order
+    const featuredData = featuredCategories.map(cat => {
+      const categoryPosts = postsByCategory[cat.id] || [];
       return {
         name: cat.name,
         slug: cat.slug,
-        posts: posts.map(p => ({ ...p, categoryId: { name: cat.name, slug: cat.slug } })),
+        posts: categoryPosts.slice(0, 3).map(p => ({
+          ...p,
+          categoryId: { name: cat.name, slug: cat.slug }
+        })),
       };
-    })
-  );
+    });
 
-  res.json(featuredData.filter(Boolean)); // Filter out any nulls if a category wasn't found
+    console.log(`Successfully loaded featured categories: ${featuredData.length}`);
+    res.json(featuredData);
+
+  } catch (error) {
+    console.error('Error in getFeaturedCategories:', error);
+    res.status(500).json({
+      error: 'Failed to load featured categories',
+      details: error.message
+    });
+  }
 }
 
 export async function createCategory(req, res) {

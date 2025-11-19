@@ -22,6 +22,16 @@ export default function Comments({ postId }) {
     }
   }, []);
 
+  // Memory leak protection: Limit comments array size
+  useEffect(() => {
+    const MAX_COMMENTS = 50; // Prevent unlimited growth
+    if (comments.length > MAX_COMMENTS) {
+      // Keep only the most recent comments
+      setComments(prevComments => prevComments.slice(-MAX_COMMENTS));
+      console.log(`Memory protection: Trimmed comments from ${comments.length} to ${MAX_COMMENTS}`);
+    }
+  }, [comments.length]);
+
   const fetchComments = async () => {
     try {
       const { data } = await api.get(`/posts/${postId}/comments`);
@@ -132,7 +142,7 @@ export default function Comments({ postId }) {
         onConfirm={handleDeleteComment}
         title="Delete Comment"
         confirmText=""
-        setConfirmText={() => {}}
+        setConfirmText={() => { }}
         confirmButtonText="Delete"
         confirmButtonVariant="danger"
         cancelButtonText="Cancel"
