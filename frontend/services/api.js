@@ -1,30 +1,21 @@
 import axios from 'axios';
 
 const getApiBaseUrl = () => {
-  // If an explicit public URL is provided, always use it. This is the most reliable method.
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
 
-  // Logic for the SERVER environment (e.g., during Server-Side Rendering)
   if (typeof window === 'undefined') {
-    // When deployed to Vercel, the VERCEL_URL environment variable is available.
-    // We must use this to construct the full internal URL to the backend API.
     if (process.env.VERCEL_URL) {
       return `https://${process.env.VERCEL_URL}/api`;
     }
-    // For local development SSR (e.g., running `npm run dev`), we use the local backend URL.
     return 'http://localhost:4000/api';
   }
 
-  // Logic for the CLIENT environment (i.e., in the browser)
-  // For local development, we connect to the local backend.
   if (window.location.hostname === 'localhost') {
       return 'http://localhost:4000/api';
   }
 
-  // In a deployed Vercel environment, the browser can use a relative path.
-  // The rewrite rules in vercel.json will correctly proxy the request to the backend.
   return '/api';
 };
 
@@ -34,19 +25,26 @@ const api = axios.create({
 });
 
 export function setAuthToken(token) {
+  // This function should ONLY run on the client side
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   if (token) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    if (typeof window !== 'undefined') localStorage.setItem('southline_token', token);
+    localStorage.setItem('southline_token', token);
   } else {
     delete api.defaults.headers.common['Authorization'];
-    if (typeof window !== 'undefined') localStorage.removeItem('southline_token');
+    localStorage.removeItem('southline_token');
   }
 }
 
-// Initialize from localStorage on the client
+// Initialize token ONLY on the client-side where localStorage is available
 if (typeof window !== 'undefined') {
-  const saved = localStorage.getItem('southline_token');
-  if (saved) setAuthToken(saved);
+  const savedToken = localStorage.getItem('southline_token');
+  if (savedToken) {
+    setAuthToken(savedToken);
+  }
 }
 
 export function getUserRole() {
