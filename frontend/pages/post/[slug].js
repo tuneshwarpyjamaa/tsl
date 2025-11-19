@@ -4,12 +4,74 @@ import Head from 'next/head';
 import { Facebook, Twitter, Linkedin } from 'lucide-react';
 import PostCard from '@/components/PostCard';
 import Comments from '@/components/Comments';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
-export default function PostPage({ post, relatedPosts, error }) {
-  if (error) {
-    return <div className="text-center py-20 text-red-500">{error}</div>;
+export default function PostPage() {
+  const router = useRouter();
+  const { slug } = router.query;
+
+  const [data, setData] = useState({
+    post: null,
+    relatedPosts: [],
+    loading: true,
+    error: null
+  });
+
+  useEffect(() => {
+    if (!slug) return;
+
+    async function fetchData() {
+      try {
+        const { data: response } = await api.get(`/api/posts/optimized/${encodeURIComponent(slug)}`);
+
+        if (response.success) {
+          setData({
+            post: response.data.post,
+            relatedPosts: response.data.relatedPosts || [],
+            loading: false,
+            error: null
+          });
+        } else {
+          setData({
+            post: null,
+            relatedPosts: [],
+            loading: false,
+            error: 'Post not found'
+          });
+        }
+      } catch (e) {
+        console.error('Error loading post:', e);
+        setData({
+          post: null,
+          relatedPosts: [],
+          loading: false,
+          error: 'Failed to load post. The server might be temporarily down.'
+        });
+      }
+    }
+
+    fetchData();
+  }, [slug]);
+
+  if (data.loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-3xl mx-auto text-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading article...</p>
+        </div>
+      </div>
+    );
   }
-  if (!post) return null;
+
+  if (data.error) {
+    return <div className="text-center py-20 text-red-500">{data.error}</div>;
+  }
+
+  if (!data.post) return null;
+
+  const { post, relatedPosts } = data;
 
   // Construct the full URL for sharing
   // In a real production app, this domain should come from an environment variable
@@ -112,32 +174,3 @@ export default function PostPage({ post, relatedPosts, error }) {
   );
 }
 
-export async function getServerSideProps(context) {
-  const { slug } = context.params;
-
-  try {
-    const { data } = await api.get(`/api/posts/optimized/${encodeURIComponent(slug)}`);
-
-    if (data.success) {
-      return {
-        props: {
-          post: data.data.post,
-          relatedPosts: data.data.relatedPosts || [],
-        },
-      };
-    } else {
-      // If the post is not found, return a 404
-      return { notFound: true };
-    }
-  } catch (e) {
-    console.error('Error loading post:', e);
-    // Handle other errors, like API down
-    return {
-      props: {
-        error: 'Failed to load post. The server might be temporarily down.',
-        post: null,
-        relatedPosts: [],
-      },
-    };
-  }
-}

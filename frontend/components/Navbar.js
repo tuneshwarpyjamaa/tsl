@@ -37,6 +37,8 @@ export default function Navbar() {
         setCategories(response.data);
       } catch (error) {
         console.error('Failed to fetch categories:', error);
+        // Set empty categories array on error to avoid breaking the navbar
+        setCategories([]);
       }
     };
 

@@ -2,12 +2,83 @@ import api from '@/services/api';
 import Meta from '@/components/Meta';
 import PostCard from '@/components/PostCard';
 import Head from 'next/head';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
-export default function CategoryPage({ category, posts, error }) {
-  if (error) {
-    return <div className="text-center py-20 text-red-500">{error}</div>;
+export default function CategoryPage() {
+  const router = useRouter();
+  const { slug } = router.query;
+
+  const [data, setData] = useState({
+    category: null,
+    posts: [],
+    loading: true,
+    error: null
+  });
+
+  useEffect(() => {
+    if (!slug) return;
+
+    async function fetchData() {
+      try {
+        const { data: response } = await api.get(`/api/categories/${slug}/posts`);
+
+        if (response && response.category) {
+          setData({
+            category: response.category,
+            posts: response.posts || [],
+            loading: false,
+            error: null
+          });
+        } else {
+          setData({
+            category: null,
+            posts: [],
+            loading: false,
+            error: 'Category not found'
+          });
+        }
+      } catch (e) {
+        console.error(`Error fetching category '${slug}':`, e);
+        if (e.response?.status === 404) {
+          setData({
+            category: null,
+            posts: [],
+            loading: false,
+            error: 'Category not found'
+          });
+        } else {
+          setData({
+            category: null,
+            posts: [],
+            loading: false,
+            error: 'Failed to load category. The server might be temporarily down.'
+          });
+        }
+      }
+    }
+
+    fetchData();
+  }, [slug]);
+
+  if (data.loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading category...</p>
+        </div>
+      </div>
+    );
   }
-  if (!category) return null;
+
+  if (data.error) {
+    return <div className="text-center py-20 text-red-500">{data.error}</div>;
+  }
+
+  if (!data.category) return null;
+
+  const { category, posts } = data;
 
   const featuredPost = posts[0];
   const otherPosts = posts.slice(1);
@@ -60,37 +131,3 @@ export default function CategoryPage({ category, posts, error }) {
   );
 }
 
-export async function getServerSideProps(context) {
-  const { slug } = context.params;
-
-  try {
-    const { data } = await api.get(`/api/categories/${slug}/posts`);
-
-    // Check if the API call was successful and data exists
-    if (data && data.category) {
-      return {
-        props: {
-          category: data.category,
-          posts: data.posts || [],
-        },
-      };
-    } else {
-      // If the category is not found by the API
-      return { notFound: true };
-    }
-  } catch (e) {
-    console.error(`Error fetching category '${slug}':`, e);
-    // If the API returns a 404 status
-    if (e.response?.status === 404) {
-      return { notFound: true };
-    }
-    // Handle other server errors
-    return {
-      props: {
-        error: 'Failed to load category. The server might be temporarily down.',
-        category: null,
-        posts: [],
-      },
-    };
-  }
-}
