@@ -2,6 +2,7 @@ import '@/styles/globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Meta from '@/components/Meta';
+import MemoryMonitor from '@/components/MemoryMonitor';
 import Head from 'next/head';
 
 export default function App({ Component, pageProps }) {
@@ -45,6 +46,7 @@ export default function App({ Component, pageProps }) {
           <Component {...pageProps} />
         </main>
         <Footer />
+        <MemoryMonitor />
       </div>
     </>
   );

@@ -8,8 +8,8 @@ class InMemoryCache {
     this.cache = new Map();
     this.defaultTTL = 5 * 60 * 1000; // 5 minutes in milliseconds
     this.cleanupInterval = 30 * 1000; // Clean up expired entries every 30 seconds
-    this.maxSize = 1000; // Prevent unlimited cache growth
-    this.maxMemoryMB = 50; // Limit cache memory usage
+    this.maxSize = 500; // STRICT LIMIT: Prevent unlimited cache growth (reduced from 1000)
+    this.maxMemoryMB = 25; // STRICT LIMIT: Limit cache memory usage (reduced from 50MB)
     
     // Track cleanup interval for proper cleanup
     this.cleanupIntervalId = null;

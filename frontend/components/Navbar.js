@@ -96,7 +96,7 @@ export default function Navbar() {
 
     return () => {
       router.events.off('routeChangeComplete', checkAuthStatus);
-      clearInterval(timer);
+      if (timer) clearInterval(timer);
       window.removeEventListener('scroll', handleScroll);
     };
   }, [router.events]);
@@ -148,10 +148,9 @@ export default function Navbar() {
   return (
     <div className="relative">
       <header className="sticky top-0 z-50">
-        <div 
-          className={`border-b border-black bg-white transition-transform duration-300 ease-in-out ${
-            isNavbarVisible ? 'translate-y-0' : '-translate-y-full'
-          }`}
+        <div
+          className={`border-b border-black bg-white transition-transform duration-300 ease-in-out ${isNavbarVisible ? 'translate-y-0' : '-translate-y-full'
+            }`}
           style={{
             transform: isNavbarVisible ? 'translateY(0)' : 'translateY(-100%)',
             position: 'sticky',
@@ -166,7 +165,7 @@ export default function Navbar() {
                 <div className="text-xs font-sans tracking-wider">
                   <span className="hidden sm:inline">{currentDateTime.date}</span>
                   <span className="sm:hidden">
-                    {new Date().toLocaleDateString('en-IN', { 
+                    {new Date().toLocaleDateString('en-IN', {
                       timeZone: 'Asia/Kolkata',
                       day: 'numeric',
                       month: 'short',
@@ -218,7 +217,7 @@ export default function Navbar() {
                 <div className="flex items-center space-x-4 relative">
                   {isAuthenticated ? (
                     <div className="relative">
-                      <button 
+                      <button
                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                         className="p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors"
                         aria-expanded={isUserMenuOpen}
@@ -261,7 +260,7 @@ export default function Navbar() {
                         </div>
                       )}
                     </div>
-                  ) : <></> }
+                  ) : <></>}
                 </div>
               </div>
             </div>
@@ -281,11 +280,11 @@ export default function Navbar() {
           </div>
         </div>
       </header>
-      
+
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40">
-          <div 
+          <div
             className="fixed inset-0 bg-black bg-opacity-50"
             onClick={() => setIsMobileMenuOpen(false)}
           />
@@ -301,7 +300,7 @@ export default function Navbar() {
                       placeholder="Search articles..."
                       className="w-full px-4 py-3 border-b-2 border-black focus:outline-none focus:border-gray-500 text-base"
                     />
-                    <button 
+                    <button
                       type="submit"
                       className="absolute right-2 top-1/2 transform -translate-y-1/2"
                       aria-label="Search"
@@ -313,7 +312,7 @@ export default function Navbar() {
                   </div>
                 </form>
                 <div className="space-y-1">
-                    {navLinks.map(link => (
+                  {navLinks.map(link => (
                     <Link
                       key={link.name}
                       href={link.href}
