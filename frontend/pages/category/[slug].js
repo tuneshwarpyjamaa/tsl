@@ -64,7 +64,7 @@ export async function getServerSideProps(context) {
   const { slug } = context.params;
 
   try {
-    const { data } = await api.get(`/categories/${slug}/posts`);
+    const { data } = await api.get(`/api/categories/${slug}/posts`);
 
     // Check if the API call was successful and data exists
     if (data && data.category) {

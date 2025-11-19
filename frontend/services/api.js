@@ -140,11 +140,11 @@ export function getUserRole() {
 }
 
 export function searchPosts(query) {
-  return api.get('/posts', { params: { q: query } });
+  return api.get('/api/posts', { params: { q: query } });
 }
 
 export function getCategories() {
-  return api.get('/categories');
+  return api.get('/api/categories');
 }
 
 export default api;

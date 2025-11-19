@@ -34,7 +34,7 @@ export default function Comments({ postId }) {
 
   const fetchComments = async () => {
     try {
-      const { data } = await api.get(`/posts/${postId}/comments`);
+      const { data } = await api.get(`/api/posts/${postId}/comments`);
       setComments(data);
     } catch (error) {
       console.error('Failed to fetch comments:', error);
@@ -53,7 +53,7 @@ export default function Comments({ postId }) {
 
     setLoading(true);
     try {
-      const { data } = await api.post(`/posts/${postId}/comments`, {
+      const { data } = await api.post(`/api/posts/${postId}/comments`, {
         content: newComment,
       });
       setComments([...comments, data]);
@@ -69,7 +69,7 @@ export default function Comments({ postId }) {
     if (!commentToDelete) return;
 
     try {
-      await api.delete(`/posts/${postId}/comments/${commentToDelete.id}`);
+      await api.delete(`/api/posts/${postId}/comments/${commentToDelete.id}`);
       setComments(comments.filter(comment => comment.id !== commentToDelete.id));
       setDeleteModalOpen(false);
       setCommentToDelete(null);

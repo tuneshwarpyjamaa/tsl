@@ -16,7 +16,7 @@ export default function UsersPage() {
       if (token) {
         setAuthToken(token);
       }
-      const { data } = await api.get('/users');
+      const { data } = await api.get('/api/users');
       setUsers(data);
     } catch (e) {
       setError('Failed to fetch users');

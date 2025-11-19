@@ -109,8 +109,8 @@ export async function getServerSideProps() {
     });
 
     const [postsRes, categoriesRes] = await Promise.all([
-      api.get('/posts/optimized/list?limit=8&page=1'),
-      api.get('/categories/featured'),
+      api.get('/api/posts/optimized/list?limit=8&page=1'),
+      api.get('/api/categories/featured'),
     ]);
 
     const rawPosts = postsRes.data.data?.posts || [];

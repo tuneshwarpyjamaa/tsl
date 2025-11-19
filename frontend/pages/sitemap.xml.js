@@ -10,8 +10,8 @@ function generateSiteMap(posts, categories) {
        <priority>1.0</priority>
      </url>
      ${categories
-       .map(({ slug }) => {
-         return `
+      .map(({ slug }) => {
+        return `
        <url>
            <loc>https://yourdomain.com/category/${slug}</loc>
            <lastmod>${new Date().toISOString()}</lastmod>
@@ -19,11 +19,11 @@ function generateSiteMap(posts, categories) {
            <priority>0.8</priority>
        </url>
      `;
-       })
-       .join('')}
+      })
+      .join('')}
      ${posts
-       .map(({ slug, createdAt }) => {
-         return `
+      .map(({ slug, createdAt }) => {
+        return `
         <url>
             <loc>https://yourdomain.com/post/${slug}</loc>
             <lastmod>${new Date(createdAt).toISOString()}</lastmod>
@@ -31,8 +31,8 @@ function generateSiteMap(posts, categories) {
             <priority>0.6</priority>
         </url>
      `;
-       })
-       .join('')}
+      })
+      .join('')}
    </urlset>
  `;
 }
@@ -44,8 +44,8 @@ function SiteMap() {
 export async function getServerSideProps({ res }) {
   try {
     const [postsRes, categoriesRes] = await Promise.all([
-      api.get('/posts'),
-      api.get('/categories')
+      api.get('/api/posts'),
+      api.get('/api/categories')
     ]);
 
     const posts = postsRes.data || [];

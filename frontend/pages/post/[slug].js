@@ -116,7 +116,7 @@ export async function getServerSideProps(context) {
   const { slug } = context.params;
 
   try {
-    const { data } = await api.get(`/posts/optimized/${encodeURIComponent(slug)}`);
+    const { data } = await api.get(`/api/posts/optimized/${encodeURIComponent(slug)}`);
 
     if (data.success) {
       return {

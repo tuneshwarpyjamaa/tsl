@@ -9,7 +9,7 @@ const Sidebar = () => {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const { data } = await api.get('/posts/trending');
+        const { data } = await api.get('/api/posts/trending');
         setTrendingPosts(data);
       } catch (e) {
         console.error('Failed to load trending posts:', e);
