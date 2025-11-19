@@ -1,5 +1,8 @@
 {
   "version": 2,
+  "protectionBypass": {
+    "/api/*": true
+  },
   "builds": [
     {
       "src": "frontend/package.json",
