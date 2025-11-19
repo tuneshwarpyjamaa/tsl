@@ -19,24 +19,52 @@ export async function getPostsByCategory(req, res) {
 }
 
 export async function getFeaturedCategories(req, res) {
-  const featuredSlugs = ['technology', 'world-news', 'business']; // Example slugs
-  const categories = await Promise.all(
-    featuredSlugs.map(slug => Category.findBySlug(slug))
-  );
+  try {
+    const featuredSlugs = ['technology', 'world-news', 'business'];
 
-  const featuredData = await Promise.all(
-    categories.map(async (cat) => {
-      if (!cat) return null;
-      const posts = await Post.findByCategory(cat.id, 5); // Limit to 5 posts
+    // First, get all featured categories in one query
+    const categories = await Category.findBySlugs(featuredSlugs);
+    if (!categories || categories.length === 0) {
+      return res.json([]);
+    }
+
+    const categoryMap = new Map(categories.map(c => [c.id, c]));
+    const categoryIds = Array.from(categoryMap.keys());
+
+    // Then, get the latest 5 posts for all those categories in a single, optimized query
+    const posts = await Post.findLatestForCategories(categoryIds, 5);
+
+    // Group the posts by category_id client-side
+    const postsByCategory = posts.reduce((acc, post) => {
+      if (!acc[post.category_id]) {
+        acc[post.category_id] = [];
+      }
+      acc[post.category_id].push(post);
+      return acc;
+    }, {});
+
+    // Finally, build the response object in the correct order
+    const featuredData = categories.map(cat => {
+      const categoryPosts = postsByCategory[cat.id] || [];
       return {
         name: cat.name,
         slug: cat.slug,
-        posts: posts.map(p => ({ ...p, categoryId: { name: cat.name, slug: cat.slug } })),
+        posts: categoryPosts.map(p => ({
+          ...p,
+          categoryId: { name: cat.name, slug: cat.slug }
+        })),
       };
-    })
-  );
+    });
 
-  res.json(featuredData.filter(Boolean)); // Filter out any nulls if a category wasn't found
+    res.json(featuredData);
+
+  } catch (error) {
+    console.error('Error in getFeaturedCategories:', error);
+    res.status(500).json({
+      error: 'Failed to load featured categories',
+      details: error.message
+    });
+  }
 }
 
 export async function createCategory(req, res) {
@@ -65,7 +93,8 @@ export async function deleteCategory(req, res) {
     const { id } = req.params;
     await Category.delete(id);
     res.status(204).send();
-  } catch (e) {
+  } catch (e)
+{
     res.status(500).json({ error: 'Failed to delete category' });
   }
 }

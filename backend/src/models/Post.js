@@ -165,6 +165,31 @@ export class Post {
     return await many(queryText, params);
   }
 
+  static async findLatestForCategories(categoryIds, limitPerCategory) {
+    if (!categoryIds || categoryIds.length === 0) {
+      return [];
+    }
+
+    const queryText = `
+      WITH ranked_posts AS (
+        SELECT
+          p.*,
+          c.name as category_name,
+          c.slug as category_slug,
+          ROW_NUMBER() OVER(PARTITION BY p."categoryId" ORDER BY p."createdAt" DESC) as rn
+        FROM posts p
+        JOIN categories c ON p."categoryId" = c.id
+        WHERE p."categoryId" = ANY($1)
+      )
+      SELECT *
+      FROM ranked_posts
+      WHERE rn <= $2
+      ORDER BY "categoryId", "createdAt" DESC;
+    `;
+
+    return await manyOrNone(queryText, [categoryIds, limitPerCategory]);
+  }
+
   static async update(id, data) {
     const { title, slug, content, categoryId, author, image } = data;
     const queryText = `

@@ -23,6 +23,14 @@ export class Category {
     return await db.one(query, [slug]);
   }
 
+  static async findBySlugs(slugs) {
+    if (!slugs || slugs.length === 0) {
+      return [];
+    }
+    const query = 'SELECT * FROM categories WHERE slug = ANY($1)';
+    return await db.manyOrNone(query, [slugs]);
+  }
+
   static async findById(id) {
     const query = 'SELECT * FROM categories WHERE id = $1';
     return await db.one(query, [id]);
