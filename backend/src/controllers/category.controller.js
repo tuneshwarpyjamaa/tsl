@@ -7,10 +7,8 @@ export async function listCategories(_req, res) {
     res.json(categories || []);
   } catch (error) {
     console.error('Error in listCategories:', error);
-    res.status(500).json({
-      error: 'Failed to load categories',
-      details: error.message
-    });
+    // Return empty array instead of error for better UX
+    res.json([]);
   }
 }
 

@@ -10,17 +10,17 @@ const getApiBaseUrl = () => {
   if (typeof window === 'undefined') {
     // In production on Vercel, try to use VERCEL_URL if available
     if (process.env.VERCEL_URL) {
-      return `https://${process.env.VERCEL_URL}/api`;
+      return `https://${process.env.VERCEL_URL}`;
     }
     // Fallback to localhost for development
-    return 'http://localhost:4000/api';
+    return 'http://localhost:4000';
   }
 
   // Handle client-side (browser environment)
   if (typeof window !== 'undefined') {
     // If running locally, use localhost backend
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:4000/api';
+      return 'http://localhost:4000';
     }
 
     // In production, use relative API paths (Vercel handles routing)
@@ -140,11 +140,11 @@ export function getUserRole() {
 }
 
 export function searchPosts(query) {
-  return api.get('/posts', { params: { q: query } });
+  return api.get('/api/posts', { params: { q: query } });
 }
 
 export function getCategories() {
-  return api.get('/categories');
+  return api.get('/api/categories');
 }
 
 export default api;

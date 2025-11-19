@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import Meta from '@/components/Meta';
 import MemoryMonitor from '@/components/MemoryMonitor';
 import Head from 'next/head';
+import Script from 'next/script';
 
 export default function App({ Component, pageProps }) {
   return (
@@ -28,8 +29,13 @@ export default function App({ Component, pageProps }) {
             })
           }}
         />
-        <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
-        <script
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"
+          strategy="afterInteractive"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];

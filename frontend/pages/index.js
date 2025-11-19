@@ -2,11 +2,84 @@ import api from '@/services/api';
 import PostCard from '@/components/PostCard';
 import Meta from '@/components/Meta';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
-export default function HomePage({ topStory, latestNews, featuredCategories, error }) {
-  if (error) {
-    return <div className="text-center py-20 text-red-500">{error}</div>;
+export default function HomePage() {
+  const [data, setData] = useState({
+    topStory: null,
+    latestNews: [],
+    featuredCategories: [],
+    loading: true,
+    error: null
+  });
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const createSummary = (post) => ({
+          ...post,
+          summary: (post.content || '').substring(0, 150) + '...',
+        });
+
+        const [postsRes, categoriesRes] = await Promise.all([
+          api.get('/api/posts/optimized/list?limit=8&page=1'),
+          api.get('/api/categories/featured'),
+        ]);
+
+        const rawPosts = postsRes.data.data?.posts || [];
+        const posts = rawPosts.map(createSummary);
+
+        let topStory = null;
+        let latestNews = [];
+        if (posts.length > 0) {
+          topStory = posts[0];
+          latestNews = posts.slice(1, 7);
+        }
+
+        const rawCategories = Array.isArray(categoriesRes.data) ? categoriesRes.data : (categoriesRes.data.data || []);
+        const categoriesWithSummaries = rawCategories.map((category) => ({
+          ...category,
+          posts: category.posts.map(createSummary),
+        }));
+
+        setData({
+          topStory,
+          latestNews,
+          featuredCategories: categoriesWithSummaries,
+          loading: false,
+          error: null
+        });
+      } catch (err) {
+        console.error(err);
+        setData({
+          topStory: null,
+          latestNews: [],
+          featuredCategories: [],
+          loading: false,
+          error: 'Failed to load content.'
+        });
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (data.loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="text-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading latest news...</p>
+        </div>
+      </div>
+    );
   }
+
+  if (data.error) {
+    return <div className="text-center py-20 text-red-500">{data.error}</div>;
+  }
+
+  const { topStory, latestNews, featuredCategories } = data;
 
   return (
     <>
@@ -101,50 +174,3 @@ export default function HomePage({ topStory, latestNews, featuredCategories, err
   );
 }
 
-export async function getServerSideProps() {
-  try {
-    const createSummary = (post) => ({
-      ...post,
-      summary: (post.content || '').substring(0, 150) + '...',
-    });
-
-    const [postsRes, categoriesRes] = await Promise.all([
-      api.get('/posts/optimized/list?limit=8&page=1'),
-      api.get('/categories/featured'),
-    ]);
-
-    const rawPosts = postsRes.data.data?.posts || [];
-    const posts = rawPosts.map(createSummary);
-
-    let topStory = null;
-    let latestNews = [];
-    if (posts.length > 0) {
-      topStory = posts[0];
-      latestNews = posts.slice(1, 7);
-    }
-
-    const rawCategories = Array.isArray(categoriesRes.data) ? categoriesRes.data : (categoriesRes.data.data || []);
-    const categoriesWithSummaries = rawCategories.map((category) => ({
-      ...category,
-      posts: category.posts.map(createSummary),
-    }));
-
-    return {
-      props: {
-        topStory,
-        latestNews,
-        featuredCategories: categoriesWithSummaries,
-      },
-    };
-  } catch (err) {
-    console.error(err);
-    return {
-      props: {
-        error: 'Failed to load content.',
-        topStory: null,
-        latestNews: [],
-        featuredCategories: [],
-      },
-    };
-  }
-}

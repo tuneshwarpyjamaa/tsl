@@ -26,6 +26,14 @@ module.exports = withPWA({
     ],
     formats: ['image/webp', 'image/avif'],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:4000/api/:path*',
+      },
+    ];
+  },
   async headers() {
     return [
       {
@@ -46,12 +54,12 @@ module.exports = withPWA({
           {
             key: 'Content-Security-Policy',
             value: "default-src 'self'; " +
-                   "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com; " +
-                   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-                   "img-src 'self' data: https:; " +
-                   "font-src 'self' https://fonts.gstatic.com; " +
-                   "connect-src 'self' http://localhost:4000 https://www.google-analytics.com; " +
-                   "frame-src https://www.googletagmanager.com;",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com; " +
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+              "img-src 'self' data: https:; " +
+              "font-src 'self' https://fonts.gstatic.com; " +
+              "connect-src 'self' http://localhost:4000 https://www.google-analytics.com; " +
+              "frame-src https://www.googletagmanager.com;",
           },
         ],
       },

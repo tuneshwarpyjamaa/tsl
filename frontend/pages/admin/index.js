@@ -60,7 +60,7 @@ export default function AdminPage() {
 
   async function fetchCategories() {
     try {
-      const { data } = await api.get('/categories');
+      const { data } = await api.get('/api/categories');
       setCategories(data);
     } catch (e) {
       console.error('Failed to fetch categories:', e);
@@ -69,7 +69,7 @@ export default function AdminPage() {
 
   async function fetchPosts() {
     try {
-      const { data } = await api.get('/posts');
+      const { data } = await api.get('/api/posts');
       setPosts(data);
     } catch (e) {
       console.error('Failed to fetch posts:', e);
@@ -113,7 +113,7 @@ export default function AdminPage() {
         await api.post('/posts', postData);
         setPostSuccess('Post created successfully!');
       }
-      
+
       // Reset form
       setPostData({
         title: '',
@@ -234,7 +234,7 @@ export default function AdminPage() {
                 <input
                   className={inputStyles}
                   value={postData.title}
-                  onChange={(e)=>setPostData({...postData, title: e.target.value})}
+                  onChange={(e) => setPostData({ ...postData, title: e.target.value })}
                   required
                 />
               </div>
@@ -243,7 +243,7 @@ export default function AdminPage() {
                 <input
                   className={inputStyles}
                   value={postData.slug}
-                  onChange={(e)=>setPostData({...postData, slug: e.target.value})}
+                  onChange={(e) => setPostData({ ...postData, slug: e.target.value })}
                   required
                 />
               </div>
@@ -254,7 +254,7 @@ export default function AdminPage() {
               <textarea
                 className={`${inputStyles} h-32`}
                 value={postData.content}
-                onChange={(e)=>setPostData({...postData, content: e.target.value})}
+                onChange={(e) => setPostData({ ...postData, content: e.target.value })}
                 required
               />
             </div>
@@ -265,7 +265,7 @@ export default function AdminPage() {
                 <select
                   className={inputStyles}
                   value={postData.categorySlug}
-                  onChange={(e)=>setPostData({...postData, categorySlug: e.target.value})}
+                  onChange={(e) => setPostData({ ...postData, categorySlug: e.target.value })}
                   required
                 >
                   <option value="">Select category</option>
@@ -279,7 +279,7 @@ export default function AdminPage() {
                 <input
                   className={inputStyles}
                   value={postData.author}
-                  onChange={(e)=>setPostData({...postData, author: e.target.value})}
+                  onChange={(e) => setPostData({ ...postData, author: e.target.value })}
                 />
               </div>
             </div>
@@ -289,20 +289,20 @@ export default function AdminPage() {
               <input
                 className={inputStyles}
                 value={postData.image}
-                onChange={(e)=>setPostData({...postData, image: e.target.value})}
+                onChange={(e) => setPostData({ ...postData, image: e.target.value })}
               />
             </div>
 
             <div className="flex space-x-2">
               <button type="submit" disabled={postLoading} className={`${buttonStyles} flex-1 py-2.5`}>
-                {postLoading 
+                {postLoading
                   ? (editingPost ? 'Updating...' : 'Creating...')
                   : (editingPost ? 'Update Post' : 'Create Post')
                 }
               </button>
               {editingPost && (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={cancelEdit}
                   className="bg-gray-200 text-gray-800 px-4 py-2.5 rounded text-sm font-medium hover:bg-gray-300 transition-colors"
                 >

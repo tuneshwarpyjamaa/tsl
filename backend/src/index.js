@@ -19,8 +19,11 @@ const articleCache = getCache();
 
 // Connect to database
 connectDB().catch(err => {
-  console.error('Database connection failed. Exiting.', err);
-  process.exit(1);
+  console.error('Database connection failed:', err);
+  // Don't exit in production (Vercel), just log the error
+  if (process.env.NODE_ENV !== 'production') {
+    process.exit(1);
+  }
 });
 
 const app = express();
@@ -39,6 +42,11 @@ app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/categories', categoryRoutes);
 
+// Simple test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Enhanced health check with memory and cache stats
 app.get('/api/health', async (_req, res) => {
   try {
@@ -46,7 +54,7 @@ app.get('/api/health', async (_req, res) => {
     const cacheStats = articleCache.getStats();
     const poolStats = getPoolStats();
     const memUsage = process.memoryUsage();
-    
+
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
@@ -68,8 +76,8 @@ app.get('/api/health', async (_req, res) => {
     });
   } catch (error) {
     console.error('Health check failed:', error);
-    res.status(500).json({ 
-      status: 'error', 
+    res.status(500).json({
+      status: 'error',
       error: error.message,
       timestamp: new Date().toISOString()
     });
@@ -82,7 +90,7 @@ if (process.env.NODE_ENV !== 'production') {
     const memUsage = process.memoryUsage();
     const cacheStats = articleCache.getStats();
     const poolStats = getPoolStats();
-    
+
     res.json({
       memory: {
         rss: `${Math.round(memUsage.rss / 1024 / 1024)}MB`,
@@ -98,12 +106,12 @@ if (process.env.NODE_ENV !== 'production') {
       uptime: process.uptime()
     });
   });
-  
+
   // Cache management endpoint (development only)
   app.post('/api/cache/clear', (req, res) => {
     articleCache.clear();
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: 'Cache cleared',
       timestamp: new Date().toISOString()
     });
@@ -112,7 +120,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // 404 handler
 app.use((req, res, _next) => {
-  res.status(404).json({ 
+  res.status(404).json({
     error: `Route not found: ${req.method} ${req.originalUrl}`,
     timestamp: new Date().toISOString()
   });
@@ -121,7 +129,7 @@ app.use((req, res, _next) => {
 // Enhanced error handler
 app.use((err, _req, res, _next) => {
   console.error('Server error:', err);
-  res.status(err.status || 500).json({ 
+  res.status(err.status || 500).json({
     error: err.message || 'Internal Server Error',
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     timestamp: new Date().toISOString()
@@ -209,22 +217,25 @@ process.on('unhandledRejection', (reason, promise) => {
   gracefulShutdown('UNHANDLED_REJECTION');
 });
 
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(`🚀 API server listening on http://localhost:${PORT}`);
-  console.log(`📊 Health check available at http://localhost:${PORT}/api/health`);
-  console.log(`🔧 Memory stats available at http://localhost:${PORT}/api/memory-stats (dev only)`);
-  console.log(`⏰ Process started at: ${new Date().toISOString()}`);
-});
-
-// Handle server errors
-server.on('error', (error) => {
-  if (error.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use. Please try a different port.`);
-  } else {
-    console.error('Server error:', error);
-  }
-  process.exit(1);
-});
-
+// For Vercel serverless deployment, export the app
 export default app;
+
+// For local development, start the server
+if (process.env.NODE_ENV !== 'production') {
+  const server = app.listen(PORT, () => {
+    console.log(`🚀 API server listening on http://localhost:${PORT}`);
+    console.log(`📊 Health check available at http://localhost:${PORT}/api/health`);
+    console.log(`🔧 Memory stats available at http://localhost:${PORT}/api/memory-stats (dev only)`);
+    console.log(`⏰ Process started at: ${new Date().toISOString()}`);
+  });
+
+  // Handle server errors
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is already in use. Please try a different port.`);
+    } else {
+      console.error('Server error:', error);
+    }
+    process.exit(1);
+  });
+}
