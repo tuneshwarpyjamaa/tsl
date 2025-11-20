@@ -1,10 +1,12 @@
 import api from '@/services/api';
 
+const SITE_URL = 'https://thesouthline.in';
+
 function generateSiteMap(posts, categories) {
   return `<?xml version="1.0" encoding="UTF-8"?>
    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
      <url>
-       <loc>https://yourdomain.com</loc>
+       <loc>${SITE_URL}</loc>
        <lastmod>${new Date().toISOString()}</lastmod>
        <changefreq>daily</changefreq>
        <priority>1.0</priority>
@@ -13,7 +15,7 @@ function generateSiteMap(posts, categories) {
       .map(({ slug }) => {
         return `
        <url>
-           <loc>https://yourdomain.com/category/${slug}</loc>
+           <loc>${SITE_URL}/category/${slug}</loc>
            <lastmod>${new Date().toISOString()}</lastmod>
            <changefreq>weekly</changefreq>
            <priority>0.8</priority>
@@ -25,7 +27,7 @@ function generateSiteMap(posts, categories) {
       .map(({ slug, createdAt }) => {
         return `
         <url>
-            <loc>https://yourdomain.com/post/${slug}</loc>
+            <loc>${SITE_URL}/post/${slug}</loc>
             <lastmod>${new Date(createdAt).toISOString()}</lastmod>
             <changefreq>monthly</changefreq>
             <priority>0.6</priority>
