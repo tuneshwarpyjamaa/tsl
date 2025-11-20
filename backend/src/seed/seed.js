@@ -43,6 +43,8 @@ async function run() {
 
     const tech = await Category.findBySlug('technology');
     const news = await Category.findBySlug('news');
+    const business = await Category.findBySlug('business');
+    const culture = await Category.findBySlug('culture');
 
     const postsData = [
       {
@@ -57,6 +59,20 @@ async function run() {
         slug: 'tech-trends-2025',
         content: 'A brief look at upcoming technology trends.',
         categoryId: tech?.id,
+        author: 'Admin'
+      },
+      {
+        title: 'Business Insights',
+        slug: 'business-insights',
+        content: 'Latest business news and analysis.',
+        categoryId: business?.id,
+        author: 'Admin'
+      },
+      {
+        title: 'Cultural Events',
+        slug: 'cultural-events',
+        content: 'Upcoming cultural events and festivals.',
+        categoryId: culture?.id,
         author: 'Admin'
       }
     ];

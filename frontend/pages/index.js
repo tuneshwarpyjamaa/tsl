@@ -137,7 +137,7 @@ export default function HomePage() {
                     </Link>
                   </h3>
                   <div className="space-y-4">
-                    {category.posts.slice(0, 3).map((post, i) => (
+                    {category.posts.slice(0, 8).map((post, i) => (
                       <div key={post.slug} className={i > 0 ? 'pt-4 border-t border-gray-100' : ''}>
                         <PostCard post={post} variant="side" />
                       </div>

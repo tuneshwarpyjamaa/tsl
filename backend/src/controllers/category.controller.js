@@ -26,26 +26,20 @@ export async function getPostsByCategory(req, res) {
 
 export async function getFeaturedCategories(req, res) {
   try {
-    // Dynamic approach: Get any available categories instead of hardcoded slugs
-    const categories = await Category.findAll();
-
-    if (!categories || categories.length === 0) {
-      console.log('No categories found in database');
-      return res.json([]);
-    }
-
-    // Take first 3 categories as "featured" if specific ones don't exist
-    const featuredCategories = categories.slice(0, 3);
+    // Get specific featured categories: Business and Culture
+    const business = await Category.findBySlug('business');
+    const culture = await Category.findBySlug('culture');
+    const featuredCategories = [business, culture].filter(Boolean);
 
     const categoryMap = new Map(featuredCategories.map(c => [c.id, c]));
     const categoryIds = Array.from(categoryMap.keys());
 
-    // Get the latest 5 posts for all those categories
+    // Get the latest 8 posts for all those categories
     let posts = [];
     try {
       // Check if findLatestForCategories exists before calling it
       if (typeof Post.findLatestForCategories === 'function') {
-        posts = await Post.findLatestForCategories(categoryIds, 5);
+        posts = await Post.findLatestForCategories(categoryIds, 8);
       } else {
         throw new Error('Post.findLatestForCategories is not defined');
       }
@@ -55,7 +49,7 @@ export async function getFeaturedCategories(req, res) {
       posts = [];
       for (const category of featuredCategories) {
         try {
-          const categoryPosts = await Post.findByCategory(category.id, 5);
+          const categoryPosts = await Post.findByCategory(category.id, 8);
           // Ensure categoryPosts is an array
           if (Array.isArray(categoryPosts)) {
             posts.push(...categoryPosts.map(p => ({ ...p, category_id: category.id })));
@@ -66,12 +60,14 @@ export async function getFeaturedCategories(req, res) {
       }
     }
 
-    // Group the posts by category_id client-side
+    // Group the posts by category id (support both column styles)
     const postsByCategory = posts.reduce((acc, post) => {
-      if (!acc[post.category_id]) {
-        acc[post.category_id] = [];
+      const cid = post.categoryId ?? post.category_id; // handle both query variants
+      if (!cid) return acc;
+      if (!acc[cid]) {
+        acc[cid] = [];
       }
-      acc[post.category_id].push(post);
+      acc[cid].push(post);
       return acc;
     }, {});
 
