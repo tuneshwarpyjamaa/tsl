@@ -43,15 +43,23 @@ export async function getFeaturedCategories(req, res) {
     // Get the latest 5 posts for all those categories
     let posts = [];
     try {
-      posts = await Post.findLatestForCategories(categoryIds, 5);
+      // Check if findLatestForCategories exists before calling it
+      if (typeof Post.findLatestForCategories === 'function') {
+        posts = await Post.findLatestForCategories(categoryIds, 5);
+      } else {
+        throw new Error('Post.findLatestForCategories is not defined');
+      }
     } catch (error) {
-      console.warn('Post.findLatestForCategories failed, trying alternative:', error.message);
+      console.warn('Post.findLatestForCategories failed or missing, trying alternative:', error.message);
       // Fallback: get latest posts for each category individually
       posts = [];
       for (const category of featuredCategories) {
         try {
           const categoryPosts = await Post.findByCategory(category.id, 5);
-          posts.push(...categoryPosts.map(p => ({ ...p, category_id: category.id })));
+          // Ensure categoryPosts is an array
+          if (Array.isArray(categoryPosts)) {
+            posts.push(...categoryPosts.map(p => ({ ...p, category_id: category.id })));
+          }
         } catch (categoryError) {
           console.warn(`Failed to get posts for category ${category.name}:`, categoryError.message);
         }

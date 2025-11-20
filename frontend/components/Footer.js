@@ -13,24 +13,24 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-6">
           <div>
             <h3 className="font-bold text-gray-900 mb-2">Categories</h3>
-            <ul className="text-sm text-gray-700 space-y-1">
-              <li><Link href="/category/news" className="hover:underline">News</Link></li>
-              <li><Link href="/category/sport" className="hover:underline">Sport</Link></li>
-              <li><Link href="/category/business" className="hover:underline">Business</Link></li>
-              <li><Link href="/category/innovation" className="hover:underline">Innovation</Link></li>
-              <li><Link href="/category/culture" className="hover:underline">Culture</Link></li>
-              <li><Link href="/category/arts" className="hover:underline">Arts</Link></li>
-              <li><Link href="/category/travel" className="hover:underline">Travel</Link></li>
-              <li><Link href="/category/earth" className="hover:underline">Earth</Link></li>
+            <ul className="text-sm text-gray-700 space-y-2 md:space-y-1">
+              <li><Link href="/category/news" className="block py-1 md:py-0 hover:underline">News</Link></li>
+              <li><Link href="/category/sport" className="block py-1 md:py-0 hover:underline">Sport</Link></li>
+              <li><Link href="/category/business" className="block py-1 md:py-0 hover:underline">Business</Link></li>
+              <li><Link href="/category/innovation" className="block py-1 md:py-0 hover:underline">Innovation</Link></li>
+              <li><Link href="/category/culture" className="block py-1 md:py-0 hover:underline">Culture</Link></li>
+              <li><Link href="/category/arts" className="block py-1 md:py-0 hover:underline">Arts</Link></li>
+              <li><Link href="/category/travel" className="block py-1 md:py-0 hover:underline">Travel</Link></li>
+              <li><Link href="/category/earth" className="block py-1 md:py-0 hover:underline">Earth</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-bold text-gray-900 mb-2">About</h3>
-            <ul className="text-sm text-gray-700 space-y-1">
-              <li><Link href="/about" className="hover:underline">About Us</Link></li>
-              <li><Link href="/contact" className="hover:underline">Contact</Link></li>
-              <li><Link href="/privacy" className="hover:underline">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:underline">Terms of Service</Link></li>
+            <ul className="text-sm text-gray-700 space-y-2 md:space-y-1">
+              <li><Link href="/about" className="block py-1 md:py-0 hover:underline">About Us</Link></li>
+              <li><Link href="/contact" className="block py-1 md:py-0 hover:underline">Contact</Link></li>
+              <li><Link href="/privacy" className="block py-1 md:py-0 hover:underline">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="block py-1 md:py-0 hover:underline">Terms of Service</Link></li>
             </ul>
           </div>
           <div>

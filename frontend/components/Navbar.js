@@ -214,7 +214,7 @@ export default function Navbar() {
                   </button>
                 </div>
                 <div className="flex-1 text-xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider text-center">
-                  <Link href="/">The South Line</Link>
+                  <Link href="/" className="whitespace-nowrap">The South Line</Link>
                 </div>
                 <div className="flex items-center space-x-4 relative">
                   {isAuthenticated ? (
@@ -290,7 +290,7 @@ export default function Navbar() {
             className="fixed inset-0 bg-black bg-opacity-50"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="fixed inset-0 top-30 bottom-0 left-0 right-0 bg-white overflow-y-auto z-50">
+          <div className="fixed inset-0 top-[120px] bottom-0 left-0 right-0 bg-white overflow-y-auto z-50">
             <div className="container mx-auto px-4 py-6">
               <nav className="flex flex-col space-y-6">
                 <form onSubmit={handleSearchSubmit} className="mb-4">

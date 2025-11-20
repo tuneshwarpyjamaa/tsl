@@ -15,7 +15,7 @@ export class Category {
 
   static async findAll() {
     const query = 'SELECT * FROM categories ORDER BY "createdAt" DESC';
-    return await db.many(query);
+    return await db.manyOrNone(query);
   }
 
   static async findBySlug(slug) {
