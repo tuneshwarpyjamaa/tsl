@@ -83,7 +83,72 @@ export default function PostPage() {
     const text = htmlContent.replace(/<[^>]+>/g, '');
     return text.substring(0, 160) + '...';
   };
+
+  // Format post content for better display
+  const formatContent = (content, title) => {
+    if (!content) return '';
+
+    // If content already has HTML structure, clean it up
+    if (content.includes('<h1>') || content.includes('<p>')) {
+      let formatted = content;
+
+      // Remove duplicate H1 if it matches the title
+      const titleRegex = new RegExp(`<h1[^>]*>${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}</h1>`, 'i');
+      formatted = formatted.replace(titleRegex, '');
+
+      // Remove artificial section headers
+      formatted = formatted.replace(/<h2[^>]*>\s*Section \d+\s*<\/h2>/gi, '');
+
+      return formatted;
+    }
+
+    // If content is plain text, format it
+    const lines = content.split('\n').filter(line => line.trim());
+    let formatted = '';
+    let inList = false;
+    let skipLines = 0; // Skip duplicate title lines at the beginning
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      // Skip the first few lines if they duplicate the title or author
+      if (skipLines > 0) {
+        skipLines--;
+        continue;
+      }
+
+      if (trimmed === title || trimmed.startsWith('By ') || trimmed.includes('•')) {
+        // Skip duplicate title, author, date lines
+        continue;
+      }
+
+      if (trimmed === 'Related Articles:') {
+        if (inList) formatted += '</ul>';
+        formatted += '<h3>Related Articles:</h3><ul>';
+        inList = true;
+      } else if (inList && trimmed && !trimmed.startsWith('Section ')) {
+        // Assume any non-empty line after "Related Articles:" is a list item
+        formatted += `<li>${trimmed}</li>`;
+      } else if (trimmed.startsWith('Section ') && /^\s*Section \d+\s*$/.test(trimmed)) {
+        // Skip artificial section headers added by SEO fix
+        continue;
+      } else if (trimmed) {
+        if (inList) {
+          formatted += '</ul>';
+          inList = false;
+        }
+        formatted += `<p>${trimmed}</p>`;
+      }
+    }
+
+    if (inList) formatted += '</ul>';
+
+    return formatted;
+  };
+
   const summary = createSummary(post.content);
+  const formattedContent = formatContent(post.content, post.title);
 
   return (
     <>
@@ -149,7 +214,7 @@ export default function PostPage() {
           {/* Post Content */}
           <div
             className="prose prose-lg max-w-none font-serif"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: formattedContent }}
           />
         </article>
 

@@ -10,12 +10,15 @@
     "seed": "node src/seed/seed.js",
     "db:migrate": "node src/migrations/run-migration.js",
     "create:admin": "node src/seed/create-admin.js",
+    "seo:check": "node seo-check.js",
+    "seo:fix": "node seo-fix.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:push": "prisma db push"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cheerio": "^1.1.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

@@ -27,7 +27,6 @@ async function run() {
       { name: 'News', slug: 'news' },
       { name: 'Sports', slug: 'sports' },
       { name: 'Arts', slug: 'arts' },
-      { name: 'Sport', slug: 'sport' },
       { name: 'Earth', slug: 'earth' },
       { name: 'Business', slug: 'business' },
       { name: 'Innovation', slug: 'innovation' }
