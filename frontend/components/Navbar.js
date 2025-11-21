@@ -148,14 +148,14 @@ export default function Navbar() {
         </div>
 
         {/* Main Navbar */}
-        <div className="glass dark:glass border-b border-gray-200 dark:border-gray-800">
+        <div className="bg-gray-900 text-white border-b border-gray-800">
           <div className="container mx-auto px-4">
             <div className="h-16 md:h-20 flex items-center justify-between">
               {/* Mobile Menu Button */}
               <div className="md:hidden">
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="p-2 text-black dark:text-white focus:outline-none"
+                  className="p-2 text-white focus:outline-none"
                 >
                   {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
@@ -163,7 +163,7 @@ export default function Navbar() {
 
               {/* Logo */}
               <div className="flex-1 md:flex-none text-center md:text-left">
-                <Link href="/" className="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-black dark:text-white uppercase tracking-wider hover:opacity-80 transition-opacity">
+                <Link href="/" className="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-white uppercase tracking-wider hover:opacity-80 transition-opacity">
                   The South Line
                 </Link>
               </div>
@@ -174,7 +174,7 @@ export default function Navbar() {
                   <Link
                     key={link.name}
                     href={link.href}
-                    className="text-sm font-bold text-gray-800 dark:text-gray-200 hover:text-black dark:hover:text-white hover:underline decoration-2 underline-offset-4 transition-all"
+                    className="text-sm font-bold text-gray-200 hover:text-white hover:underline decoration-2 underline-offset-4 transition-all"
                   >
                     {link.name}
                   </Link>
@@ -189,9 +189,9 @@ export default function Navbar() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search..."
-                    className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-full py-1.5 pl-4 pr-10 text-sm focus:ring-2 focus:ring-black dark:focus:ring-white transition-all"
+                    className="w-full bg-gray-800 border-none rounded-full py-1.5 pl-4 pr-10 text-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-white transition-all"
                   />
-                  <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 group-hover:text-black dark:group-hover:text-white">
+                  <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-white">
                     <Search size={16} />
                   </button>
                 </form>
