@@ -118,7 +118,7 @@ export default function Navbar() {
       <header
         className={`fixed top-0 left-0 right-0 transition-all duration-300 ease-in-out ${isNavbarVisible ? 'translate-y-0' : '-translate-y-full'}`}
       >
-        {/* Top Bar */}
+        {/* Top Bar
         <div className="bg-black dark:bg-gray-900 text-white text-xs py-2 px-4">
           <div className="container mx-auto flex justify-between items-center">
             <div className="flex items-center space-x-3">
@@ -138,7 +138,7 @@ export default function Navbar() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Main Navbar */}
         <div className="bg-gray-900 text-white border-b border-gray-800">
