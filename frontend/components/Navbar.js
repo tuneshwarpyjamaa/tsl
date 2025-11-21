@@ -174,6 +174,15 @@ export default function Navbar() {
                 ))}
               </nav>
 
+              {/* Theme Toggle Button */}
+              <button
+                onClick={toggleDarkMode}
+                className="hidden md:block p-1 text-gray-300 hover:text-white transition-colors"
+                aria-label="Toggle dark mode"
+              >
+                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+
               {/* Search Icon (Desktop) */}
               <div className="hidden md:block w-48">
                 <form onSubmit={handleSearchSubmit} className="relative group">
@@ -239,10 +248,19 @@ export default function Navbar() {
           </nav>
 
           <div className="pt-6 border-t border-gray-200 dark:border-gray-800 mt-auto">
-            <div className="flex justify-center space-x-8">
-              <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"><Facebook size={24} /></a>
-              <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"><Twitter size={24} /></a>
-              <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"><Instagram size={24} /></a>
+            <div className="flex justify-between items-center">
+              <button
+                onClick={toggleDarkMode}
+                className="p-1 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+                aria-label="Toggle dark mode"
+              >
+                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              <div className="flex space-x-8">
+                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"><Facebook size={24} /></a>
+                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"><Twitter size={24} /></a>
+                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"><Instagram size={24} /></a>
+              </div>
             </div>
           </div>
         </div>
