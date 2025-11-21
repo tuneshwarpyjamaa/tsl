@@ -57,7 +57,7 @@ export default function App({ Component, pageProps }) {
       </Head>
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-6">
+        <main className="flex-1 container mx-auto px-4 pt-32 pb-6">
           <Component {...pageProps} />
         </main>
         <Footer />

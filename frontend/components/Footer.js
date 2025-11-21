@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { getCategories } from '../services/api';
+import { Facebook, Twitter, Instagram, Linkedin, Mail } from 'lucide-react';
 
 export default function Footer() {
   const [categories, setCategories] = useState([]);
@@ -12,7 +13,6 @@ export default function Footer() {
         setCategories(response.data);
       } catch (error) {
         console.error('Failed to fetch categories:', error);
-        // Set empty categories array on error to avoid breaking the footer
         setCategories([]);
       }
     };
@@ -21,55 +21,83 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="border-t-4 border-black mt-12 py-8 bg-gray-100">
+    <footer className="bg-gray-900 text-white pt-16 pb-8 mt-20">
       <div className="container mx-auto px-4">
-        <div className="pb-6 border-b border-gray-300">
-          <Link href="/" className="text-2xl md:text-3xl font-serif font-bold text-black uppercase tracking-wider hover:text-gray-800 transition-colors">
-            The South Line
-          </Link>
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+          {/* Brand Column */}
+          <div className="space-y-6">
+            <Link href="/" className="block">
+              <h2 className="text-2xl font-serif font-bold uppercase tracking-wider text-white">
+                The South Line
+              </h2>
+            </Link>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Delivering unbiased news, in-depth analysis, and compelling stories from around the globe. Your trusted source for what matters.
+            </p>
+            <div className="flex space-x-4">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors"><Facebook size={20} /></a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors"><Twitter size={20} /></a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors"><Instagram size={20} /></a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors"><Linkedin size={20} /></a>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-6">
+          {/* Categories Column */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-2">Categories</h3>
-            <ul className="text-sm text-gray-700 space-y-2 md:space-y-1">
-              {categories.map(category => (
+            <h3 className="text-lg font-bold mb-6 border-b border-gray-700 pb-2 inline-block">Categories</h3>
+            <ul className="space-y-3 text-sm text-gray-400">
+              {categories.slice(0, 6).map(category => (
                 <li key={category.slug}>
-                  <Link href={`/category/${category.slug}`} className="block py-1 md:py-0 hover:underline">
+                  <Link href={`/category/${category.slug}`} className="hover:text-white hover:translate-x-1 transition-all inline-block">
                     {category.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
+
+          {/* Quick Links Column */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-2">About</h3>
-            <ul className="text-sm text-gray-700 space-y-2 md:space-y-1">
-              <li><Link href="/about" className="block py-1 md:py-0 hover:underline">About Us</Link></li>
-              <li><Link href="/contact" className="block py-1 md:py-0 hover:underline">Contact</Link></li>
-              <li><Link href="/privacy" className="block py-1 md:py-0 hover:underline">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="block py-1 md:py-0 hover:underline">Terms of Service</Link></li>
+            <h3 className="text-lg font-bold mb-6 border-b border-gray-700 pb-2 inline-block">Company</h3>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li><Link href="/about" className="hover:text-white hover:translate-x-1 transition-all inline-block">About Us</Link></li>
+              <li><Link href="/contact" className="hover:text-white hover:translate-x-1 transition-all inline-block">Contact</Link></li>
+              <li><Link href="/privacy" className="hover:text-white hover:translate-x-1 transition-all inline-block">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-white hover:translate-x-1 transition-all inline-block">Terms of Service</Link></li>
+              <li><Link href="/careers" className="hover:text-white hover:translate-x-1 transition-all inline-block">Careers</Link></li>
             </ul>
           </div>
+
+          {/* Newsletter Column */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-2">Follow Us</h3>
-            <ul className="text-sm text-gray-700 space-y-1">
-              <li><Link href="#" className="hover:underline">Facebook</Link></li>
-              <li><Link href="#" className="hover:underline">Twitter</Link></li>
-              <li><Link href="#" className="hover:underline">Instagram</Link></li>
-              <li><Link href="#" className="hover:underline">LinkedIn</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-bold text-gray-900 mb-2">Newsletter</h3>
-            <p className="text-sm text-gray-700 mb-2">Subscribe to our newsletter for the latest updates.</p>
-            <input type="email" placeholder="Enter your email" className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black" />
-            <button className="mt-2 w-full bg-black text-white px-4 py-2 text-sm font-bold hover:bg-gray-800">Subscribe</button>
+            <h3 className="text-lg font-bold mb-6 border-b border-gray-700 pb-2 inline-block">Newsletter</h3>
+            <p className="text-gray-400 text-sm mb-4">
+              Subscribe to our newsletter for the latest updates and exclusive content.
+            </p>
+            <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                <input
+                  type="email"
+                  placeholder="Your email address"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-gray-500 transition-all"
+                />
+              </div>
+              <button className="w-full bg-white text-black font-bold py-2.5 px-4 rounded-lg text-sm hover:bg-gray-200 transition-colors">
+                Subscribe
+              </button>
+            </form>
           </div>
         </div>
 
-        <div className="text-sm text-gray-700 pt-6 border-t border-gray-300 mt-6 text-center">
-          <p className="text-sm text-gray-600"> {new Date().getFullYear()} The South Line. All rights reserved.</p>
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
+          <p>&copy; {new Date().getFullYear()} The South Line. All rights reserved.</p>
+          <div className="flex space-x-6 mt-4 md:mt-0">
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+            <Link href="/sitemap" className="hover:text-white transition-colors">Sitemap</Link>
+          </div>
         </div>
       </div>
     </footer>

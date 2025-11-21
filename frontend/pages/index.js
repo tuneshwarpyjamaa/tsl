@@ -116,7 +116,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="mt-8 text-center sm:hidden">
-                  <button className="bg-black text-white px-6 py-2 text-sm font-bold hover:bg-gray-800 transition-colors">
+                  <button className="bg-primary text-white px-6 py-2 text-sm font-bold hover:bg-gray-800 transition-colors">
                     Load More Stories
                   </button>
                 </div>
@@ -160,7 +160,7 @@ export default function HomePage() {
                   />
                   <button
                     type="submit"
-                    className="w-full bg-black text-white py-2 px-4 text-sm font-bold hover:bg-gray-800 transition-colors"
+                    className="w-full bg-primary text-white py-2 px-4 text-sm font-bold hover:bg-gray-800 transition-colors"
                   >
                     Subscribe
                   </button>
