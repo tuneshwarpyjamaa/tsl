@@ -3,7 +3,6 @@ import Meta from '@/components/Meta';
 import Head from 'next/head';
 import { Facebook, Twitter, Linkedin } from 'lucide-react';
 import PostCard from '@/components/PostCard';
-import Comments from '@/components/Comments';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
@@ -217,11 +216,6 @@ export default function PostPage() {
             dangerouslySetInnerHTML={{ __html: formattedContent }}
           />
         </article>
-
-        {/* Comments Section */}
-        <section className="max-w-3xl mx-auto mt-12">
-          <Comments postId={post.id} />
-        </section>
 
         {/* Related Posts */}
         {relatedPosts.length > 0 && (

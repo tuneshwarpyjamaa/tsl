@@ -96,33 +96,3 @@ export async function getFeaturedCategories(req, res) {
   }
 }
 
-export async function createCategory(req, res) {
-  try {
-    const { name } = req.body;
-    const category = await Category.create({ name });
-    res.status(201).json(category);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to create category' });
-  }
-}
-
-export async function updateCategory(req, res) {
-  try {
-    const { id } = req.params;
-    const { name } = req.body;
-    const category = await Category.update(id, { name });
-    res.json(category);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to update category' });
-  }
-}
-
-export async function deleteCategory(req, res) {
-  try {
-    const { id } = req.params;
-    await Category.delete(id);
-    res.status(204).send();
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to delete category' });
-  }
-}
