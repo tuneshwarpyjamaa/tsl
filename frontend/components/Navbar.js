@@ -131,13 +131,6 @@ export default function Navbar() {
               </span>
             </div>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={toggleDarkMode}
-                className="hidden hover:text-gray-300 transition-colors focus:outline-none"
-                aria-label="Toggle Dark Mode"
-              >
-                {darkMode ? <Sun size={14} /> : <Moon size={14} />}
-              </button>
               <div className="hidden sm:flex items-center space-x-3 border-l border-gray-700 pl-4">
                 <a href="#" className="hover:text-gray-300 transition-colors"><Facebook size={14} /></a>
                 <a href="#" className="hover:text-gray-300 transition-colors"><Twitter size={14} /></a>
