@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { connectDB } from '../config/db.js';
-import { User } from '../models/User.js';
+import { db } from '../lib/db.js';
 import { Category } from '../models/Category.js';
 import { Post } from '../models/Post.js';
 
@@ -11,26 +11,29 @@ await connectDB(process.env.DATABASE_URL);
 
 async function run() {
   try {
-    const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@example.com';
-    const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'admin123';
-
-    let admin = await User.findByEmail(adminEmail);
-    if (!admin) {
-      admin = await User.create({ email: adminEmail, password: adminPassword, role: 'admin' });
-      console.log('Created admin', adminEmail);
-    }
 
     const categoriesData = [
-      { name: 'Technology', slug: 'technology' },
-      { name: 'Travel', slug: 'travel' },
-      { name: 'Culture', slug: 'culture' },
-      { name: 'News', slug: 'news' },
-      { name: 'Sports', slug: 'sports' },
-      { name: 'Arts', slug: 'arts' },
-      { name: 'Earth', slug: 'earth' },
-      { name: 'Business', slug: 'business' },
-      { name: 'Innovation', slug: 'innovation' }
+      { name: 'Core Analysis', slug: 'core-analysis' },
+      { name: 'The Long View', slug: 'the-long-view' },
+      { name: 'The Archive', slug: 'the-archive' }
     ];
+
+    // Delete existing categories not in the new list
+    const existingCategories = await Category.findAll();
+    const categoriesToDelete = existingCategories.filter(cat => !categoriesData.some(c => c.slug === cat.slug));
+
+    // Delete posts associated with categories to be deleted
+    for (const cat of categoriesToDelete) {
+      const deletePostsQuery = 'DELETE FROM posts WHERE "categoryId" = $1';
+      await db.none(deletePostsQuery, [cat.id]);
+      console.log(`Deleted posts for category: ${cat.name}`);
+    }
+
+    // Now delete the categories
+    for (const cat of categoriesToDelete) {
+      await Category.delete(cat.id);
+      console.log(`Deleted category: ${cat.name}`);
+    }
 
     for (const cat of categoriesData) {
       const existing = await Category.findBySlug(cat.slug);
@@ -40,38 +43,37 @@ async function run() {
     }
     console.log('Seeded categories');
 
-    const tech = await Category.findBySlug('technology');
-    const news = await Category.findBySlug('news');
-    const business = await Category.findBySlug('business');
-    const culture = await Category.findBySlug('culture');
+    const coreAnalysis = await Category.findBySlug('core-analysis');
+    const longView = await Category.findBySlug('the-long-view');
+    const archive = await Category.findBySlug('the-archive');
 
     const postsData = [
       {
-        title: 'Welcome to The South Line',
-        slug: 'welcome-to-the-south-line',
-        content: 'This is a sample post. Edit or delete it from the admin dashboard.',
-        categoryId: news?.id,
+        title: 'Welcome to Core Analysis',
+        slug: 'welcome-to-core-analysis',
+        content: 'Direct, strong analysis dissecting complex policies, geopolitics, and economies. For long-term perspectives, check out The Long View on Trends. Also, explore the Archive of Reference Materials for background information.',
+        categoryId: coreAnalysis?.id,
         author: 'Admin'
       },
       {
-        title: 'Tech Trends 2025',
-        slug: 'tech-trends-2025',
-        content: 'A brief look at upcoming technology trends.',
-        categoryId: tech?.id,
+        title: 'The Long View on Trends',
+        slug: 'the-long-view-on-trends',
+        content: 'Non-reactive focus on long-term trends, future policy implications, and emerging technology shifts. This complements the Welcome to Core Analysis approach. See Additional Core Analysis for more detailed breakdowns.',
+        categoryId: longView?.id,
         author: 'Admin'
       },
       {
-        title: 'Business Insights',
-        slug: 'business-insights',
-        content: 'Latest business news and analysis.',
-        categoryId: business?.id,
+        title: 'Archive of Reference Materials',
+        slug: 'archive-of-reference-materials',
+        content: 'Curated collection of background papers, reading lists, and research materials. Useful for understanding the context in Welcome to Core Analysis and The Long View on Trends.',
+        categoryId: archive?.id,
         author: 'Admin'
       },
       {
-        title: 'Cultural Events',
-        slug: 'cultural-events',
-        content: 'Upcoming cultural events and festivals.',
-        categoryId: culture?.id,
+        title: 'Additional Core Analysis',
+        slug: 'additional-core-analysis',
+        content: 'Further dissection of economic policies and geopolitical strategies. Builds on the foundation from Welcome to Core Analysis. For archival references, visit Archive of Reference Materials.',
+        categoryId: coreAnalysis?.id,
         author: 'Admin'
       }
     ];

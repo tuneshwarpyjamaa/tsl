@@ -2,17 +2,26 @@ import { query, one, many, manyOrNone, any, none } from '../config/db.js';
 import articleCache, { cacheKeys } from '../lib/cache.js';
 
 export class Post {
+  static async create(data) {
+    const { title, slug, content, categoryId, author = 'Admin', image } = data;
+    const query = `
+      INSERT INTO posts (title, slug, content, "categoryId", author, image, "createdAt", "updatedAt")
+      VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+      RETURNING id, title, slug, content, "categoryId", author, image, "createdAt", "updatedAt"
+    `;
+    return await one(query, [title, slug, content, categoryId, author, image]);
+  }
 
   static async findAll({ limit = 10, offset = 0 } = {}) {
     // Check cache for common queries
     const cacheKey = cacheKeys.postsList(Math.floor(offset / limit) + 1, limit);
     const cachedPosts = articleCache.get(cacheKey);
-    
+
     if (cachedPosts) {
       console.log(`Cache hit for posts list: ${cacheKey}`);
       return cachedPosts;
     }
-    
+
     const queryText = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
       FROM posts p
@@ -21,7 +30,7 @@ export class Post {
       LIMIT $1 OFFSET $2
     `;
     const posts = await manyOrNone(queryText, [limit, offset]);
-    
+
     // Memory-aware caching
     if (posts && posts.length > 0) {
       const cacheStats = articleCache.getStats();
@@ -30,7 +39,7 @@ export class Post {
         articleCache.cachePostsList(posts); // Cache individual posts if space allows
       }
     }
-    
+
     return posts;
   }
 
@@ -44,12 +53,12 @@ export class Post {
     // Check cache for trending posts
     const cacheKey = `posts:trending:${limit}`;
     const cachedPosts = articleCache.get(cacheKey);
-    
+
     if (cachedPosts) {
       console.log(`Cache hit for trending posts: ${cacheKey}`);
       return cachedPosts;
     }
-    
+
     const queryText = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
       FROM posts p
@@ -58,7 +67,7 @@ export class Post {
       LIMIT $1
     `;
     const posts = await many(queryText, [limit]);
-    
+
     // Cache the results for 3 minutes with memory checks
     if (posts && posts.length > 0) {
       const cacheStats = articleCache.getStats();
@@ -67,7 +76,32 @@ export class Post {
         articleCache.cachePostsList(posts);
       }
     }
-    
+
+    return posts;
+  }
+
+  static async findForInternalLinking(limit = 20) {
+    const cacheKey = `posts:internal_linking:${limit}`;
+    const cachedPosts = articleCache.get(cacheKey);
+
+    if (cachedPosts) {
+      console.log(`Cache hit for internal linking posts: ${cacheKey}`);
+      return cachedPosts;
+    }
+
+    const queryText = `
+      SELECT p.id, p.title, p.slug
+      FROM posts p
+      ORDER BY p."createdAt" DESC
+      LIMIT $1
+    `;
+    const posts = await many(queryText, [limit]);
+
+    // Cache for 5 minutes
+    if (posts && posts.length > 0) {
+      articleCache.set(cacheKey, posts, 5 * 60 * 1000);
+    }
+
     return posts;
   }
 
@@ -75,12 +109,12 @@ export class Post {
     // Check cache first
     const cacheKey = cacheKeys.post(slug);
     const cachedPost = articleCache.get(cacheKey);
-    
+
     if (cachedPost) {
       console.log(`Cache hit for post: ${slug}`);
       return cachedPost;
     }
-    
+
     console.log(`Cache miss for post: ${slug}, querying database...`);
     const queryText = `
       SELECT p.*, c.name as category_name, c.slug as category_slug
@@ -89,7 +123,7 @@ export class Post {
       WHERE p.slug = $1
     `;
     const post = await one(queryText, [slug]);
-    
+
     // Cache the result if space allows
     if (post) {
       const cacheStats = articleCache.getStats();
@@ -97,7 +131,7 @@ export class Post {
         articleCache.cachePost(post);
       }
     }
-    
+
     return post;
   }
 
@@ -120,12 +154,12 @@ export class Post {
       ORDER BY p."createdAt" DESC
     `;
     const params = [categoryId];
-    
+
     if (limit) {
       queryText += ' LIMIT $2';
       params.push(limit);
     }
-    
+
     return await many(queryText, params);
   }
 
@@ -187,19 +221,19 @@ export class Post {
       const recentThreshold = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days
       if (new Date(post.createdAt) > recentThreshold) {
         articleCache.delete('posts:list:1:10');
-        
+
         // Clear trending cache for very recent posts
         const dayThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000);
         if (new Date(post.createdAt) > dayThreshold) {
           articleCache.delete('posts:trending:5');
         }
       }
-      
+
       // Clear category-specific caches if relevant
       if (post.category_slug) {
         articleCache.delete(`post_list:${post.category_slug}:1:10`);
       }
-      
+
     } catch (error) {
       console.warn('Error during cache invalidation:', error.message);
       // Don't let cache invalidation errors break the main operation
@@ -224,13 +258,13 @@ export class Post {
       ORDER BY count DESC
       LIMIT 5
     `;
-    
+
     const [total, recent, topCategories] = await Promise.all([
       one(totalQuery),
       one(recentQuery),
       many(categoryQuery)
     ]);
-    
+
     return {
       total: parseInt(total.count, 10),
       recent24h: parseInt(recent.count, 10),

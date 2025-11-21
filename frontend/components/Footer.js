@@ -1,6 +1,25 @@
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { getCategories } from '../services/api';
 
 export default function Footer() {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getCategories();
+        setCategories(response.data);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+        // Set empty categories array on error to avoid breaking the footer
+        setCategories([]);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   return (
     <footer className="border-t-4 border-black mt-12 py-8 bg-gray-100">
       <div className="container mx-auto px-4">
@@ -14,14 +33,13 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-gray-900 mb-2">Categories</h3>
             <ul className="text-sm text-gray-700 space-y-2 md:space-y-1">
-              <li><Link href="/category/news" className="block py-1 md:py-0 hover:underline">News</Link></li>
-              <li><Link href="/category/sport" className="block py-1 md:py-0 hover:underline">Sport</Link></li>
-              <li><Link href="/category/business" className="block py-1 md:py-0 hover:underline">Business</Link></li>
-              <li><Link href="/category/innovation" className="block py-1 md:py-0 hover:underline">Innovation</Link></li>
-              <li><Link href="/category/culture" className="block py-1 md:py-0 hover:underline">Culture</Link></li>
-              <li><Link href="/category/arts" className="block py-1 md:py-0 hover:underline">Arts</Link></li>
-              <li><Link href="/category/travel" className="block py-1 md:py-0 hover:underline">Travel</Link></li>
-              <li><Link href="/category/earth" className="block py-1 md:py-0 hover:underline">Earth</Link></li>
+              {categories.map(category => (
+                <li key={category.slug}>
+                  <Link href={`/category/${category.slug}`} className="block py-1 md:py-0 hover:underline">
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
@@ -52,7 +70,6 @@ export default function Footer() {
 
         <div className="text-sm text-gray-700 pt-6 border-t border-gray-300 mt-6 text-center">
           <p className="text-sm text-gray-600"> {new Date().getFullYear()} The South Line. All rights reserved.</p>
-          <p>Delivering the latest news and analysis with depth.</p>
         </div>
       </div>
     </footer>

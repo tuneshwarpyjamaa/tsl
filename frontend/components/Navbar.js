@@ -102,7 +102,6 @@ export default function Navbar() {
   }, [isMobileMenuOpen]);
 
   const navLinks = [
-    { name: 'Home', href: '/' },
     ...categories.map(cat => ({ name: cat.name, href: `/category/${cat.slug}` }))
   ];
 

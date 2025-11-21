@@ -13,6 +13,7 @@ export default function PostPage() {
   const [data, setData] = useState({
     post: null,
     relatedPosts: [],
+    linkablePosts: [],
     loading: true,
     error: null
   });
@@ -28,6 +29,7 @@ export default function PostPage() {
           setData({
             post: response.data.post,
             relatedPosts: response.data.relatedPosts || [],
+            linkablePosts: response.data.linkablePosts || [],
             loading: false,
             error: null
           });
@@ -35,6 +37,7 @@ export default function PostPage() {
           setData({
             post: null,
             relatedPosts: [],
+            linkablePosts: [],
             loading: false,
             error: 'Post not found'
           });
@@ -44,6 +47,7 @@ export default function PostPage() {
         setData({
           post: null,
           relatedPosts: [],
+          linkablePosts: [],
           loading: false,
           error: 'Failed to load post. The server might be temporarily down.'
         });
@@ -70,7 +74,7 @@ export default function PostPage() {
 
   if (!data.post) return null;
 
-  const { post, relatedPosts } = data;
+  const { post, relatedPosts, linkablePosts } = data;
 
   // Construct the full URL for sharing
   // In a real production app, this domain should come from an environment variable
@@ -83,8 +87,35 @@ export default function PostPage() {
     return text.substring(0, 160) + '...';
   };
 
+  // Helper function to insert internal links in text
+  const insertInternalLinks = (text, linkablePosts) => {
+    if (!text || !linkablePosts.length) return text;
+
+    let result = text;
+    const linkedSlugs = new Set(); // To avoid linking the same post multiple times
+
+    for (const post of linkablePosts) {
+      if (linkedSlugs.has(post.slug)) continue;
+
+      // Escape special regex chars in title
+      const escapedTitle = post.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Match whole words, case insensitive
+      const regex = new RegExp(`\\b${escapedTitle}\\b`, 'gi');
+
+      if (regex.test(result)) {
+        // Replace first occurrence
+        result = result.replace(regex, `<a href="/post/${post.slug}" class="internal-link">${post.title}</a>`);
+        linkedSlugs.add(post.slug);
+        // Limit to 3 links per post
+        if (linkedSlugs.size >= 3) break;
+      }
+    }
+
+    return result;
+  };
+
   // Format post content for better display
-  const formatContent = (content, title) => {
+  const formatContent = (content, title, linkablePosts = []) => {
     if (!content) return '';
 
     // If content already has HTML structure, clean it up
@@ -97,6 +128,9 @@ export default function PostPage() {
 
       // Remove artificial section headers
       formatted = formatted.replace(/<h2[^>]*>\s*Section \d+\s*<\/h2>/gi, '');
+
+      // Insert internal links in the HTML content (simple text replace, assuming no nested tags in text)
+      formatted = insertInternalLinks(formatted, linkablePosts);
 
       return formatted;
     }
@@ -128,7 +162,8 @@ export default function PostPage() {
         inList = true;
       } else if (inList && trimmed && !trimmed.startsWith('Section ')) {
         // Assume any non-empty line after "Related Articles:" is a list item
-        formatted += `<li>${trimmed}</li>`;
+        const linkedText = insertInternalLinks(trimmed, linkablePosts);
+        formatted += `<li>${linkedText}</li>`;
       } else if (trimmed.startsWith('Section ') && /^\s*Section \d+\s*$/.test(trimmed)) {
         // Skip artificial section headers added by SEO fix
         continue;
@@ -137,7 +172,8 @@ export default function PostPage() {
           formatted += '</ul>';
           inList = false;
         }
-        formatted += `<p>${trimmed}</p>`;
+        const linkedText = insertInternalLinks(trimmed, linkablePosts);
+        formatted += `<p>${linkedText}</p>`;
       }
     }
 
@@ -147,7 +183,7 @@ export default function PostPage() {
   };
 
   const summary = createSummary(post.content);
-  const formattedContent = formatContent(post.content, post.title);
+  const formattedContent = formatContent(post.content, post.title, linkablePosts);
 
   return (
     <>

@@ -15,13 +15,13 @@ export async function getCompletePost(req, res) {
   try {
     const { slug } = req.params;
     const startTime = Date.now();
-    
+
     console.log(`[PERF] Starting optimized post fetch for: ${slug}`);
-    
+
     // Check cache for complete post data first
     const cacheKey = `complete_post:${slug}`;
     const cachedData = articleCache.get(cacheKey);
-    
+
     if (cachedData) {
       const loadTime = Date.now() - startTime;
       console.log(`[PERF] Cache hit for complete post: ${slug} (${loadTime}ms)`);
@@ -34,20 +34,20 @@ export async function getCompletePost(req, res) {
         }
       });
     }
-    
+
     console.log(`[PERF] Cache miss, querying database...`);
-    
+
     // Get main post with category info (uses cache internally)
     const post = await Post.findBySlug(slug);
     if (!post) {
       return res.status(404).json({ error: 'Post not found' });
     }
-    
+
     // Get related posts from same category (request 4 to ensure 3 after filtering current post)
     const category = await Category.findBySlug(post.category_slug);
     const relatedPosts = category ?
       await Post.findByCategory(category.id, 4) : [];
-    
+
     // Filter out the current post and format
     const formattedRelated = relatedPosts
       .filter(p => p.slug !== slug)
@@ -62,7 +62,17 @@ export async function getCompletePost(req, res) {
         category_name: p.category_name,
         category_slug: p.category_slug
       }));
-    
+
+    // Get posts for internal linking (exclude current post)
+    const linkablePostsRaw = await Post.findForInternalLinking(20);
+    const linkablePosts = linkablePostsRaw
+      .filter(p => p.slug !== slug)
+      .slice(0, 15) // Limit to 15 for performance
+      .map(p => ({
+        title: p.title,
+        slug: p.slug
+      }));
+
     // Prepare complete response data
     const completeData = {
       post: {
@@ -74,18 +84,19 @@ export async function getCompletePost(req, res) {
         }
       },
       relatedPosts: formattedRelated,
+      linkablePosts: linkablePosts,
       meta: {
         loadTime: Date.now() - startTime,
         relatedCount: formattedRelated.length
       }
     };
-    
+
     // Cache the complete result for 5 minutes
     articleCache.set(cacheKey, completeData, 5 * 60 * 1000);
-    
+
     const loadTime = Date.now() - startTime;
     console.log(`[PERF] Complete post loaded in: ${loadTime}ms`);
-    
+
     res.json({
       success: true,
       data: completeData,
@@ -94,12 +105,12 @@ export async function getCompletePost(req, res) {
         loadTime
       }
     });
-    
+
   } catch (error) {
     console.error('[PERF] Error in getCompletePost:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to load post',
-      details: error.message 
+      details: error.message
     });
   }
 }
@@ -113,16 +124,16 @@ export async function getOptimizedPostList(req, res) {
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const offset = (pageNum - 1) * limitNum;
-    
+
     const startTime = Date.now();
-    
+
     // Check cache for list results
-    const cacheKey = category ? 
+    const cacheKey = category ?
       `post_list:${category}:${pageNum}:${limitNum}` :
       `post_list:all:${pageNum}:${limitNum}`;
-    
+
     const cachedData = articleCache.get(cacheKey);
-    
+
     if (cachedData) {
       const loadTime = Date.now() - startTime;
       console.log(`[PERF] Cache hit for post list: ${cacheKey} (${loadTime}ms)`);
@@ -132,24 +143,24 @@ export async function getOptimizedPostList(req, res) {
         meta: { source: 'cache', loadTime }
       });
     }
-    
+
     let posts;
     let totalCount;
-    
+
     if (category) {
       // Get category first
       const categoryData = await Category.findBySlug(category);
       if (!categoryData) {
         return res.status(404).json({ error: 'Category not found' });
       }
-      
+
       posts = await Post.findByCategory(categoryData.id, limitNum);
       totalCount = posts.length; // Simplified for performance
     } else {
       posts = await Post.findAll({ limit: limitNum, offset });
       totalCount = await Post.countAll();
     }
-    
+
     // Format posts for consistent structure
     const formattedPosts = posts.map(post => ({
       id: post.id,
@@ -164,7 +175,7 @@ export async function getOptimizedPostList(req, res) {
         slug: post.category_slug
       }
     }));
-    
+
     const result = {
       posts: formattedPosts,
       pagination: {
@@ -174,27 +185,27 @@ export async function getOptimizedPostList(req, res) {
         totalPages: Math.ceil(totalCount / limitNum)
       }
     };
-    
+
     // Cache for 2 minutes
     articleCache.set(cacheKey, result, 2 * 60 * 1000);
-    
+
     const loadTime = Date.now() - startTime;
     console.log(`[PERF] Post list loaded in: ${loadTime}ms`);
-    
+
     res.json({
       success: true,
       data: result,
-      meta: { 
+      meta: {
         source: 'database',
-        loadTime 
+        loadTime
       }
     });
-    
+
   } catch (error) {
     console.error('[PERF] Error in getOptimizedPostList:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to load posts',
-      details: error.message 
+      details: error.message
     });
   }
 }
