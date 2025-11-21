@@ -2,42 +2,6 @@ import { query, one, many, manyOrNone, any, none } from '../config/db.js';
 import articleCache, { cacheKeys } from '../lib/cache.js';
 
 export class Post {
-  static async create(data) {
-    const { title, slug, content, categoryId, author = 'Admin', image, authorId } = data;
-    
-    const queryText = `
-      INSERT INTO posts (title, slug, content, "categoryId", author, image, "authorId", "createdAt", "updatedAt")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-      RETURNING *
-    `;
-    
-    const newPost = await one(queryText, [title, slug, content, categoryId, author, image, authorId]);
-    
-    if (newPost) {
-      // Fetch category info with optimized single query
-      const categoryQuery = `SELECT name, slug FROM categories WHERE id = $1`;
-      const category = await one(categoryQuery, [categoryId]);
-      
-      const postWithCategory = {
-        ...newPost,
-        category_name: category.name,
-        category_slug: category.slug
-      };
-      
-      // Memory-aware caching with size checks
-      const cacheStats = articleCache.getStats();
-      if (cacheStats.activeItems < 800) { // Leave room for other operations
-        articleCache.cachePost(postWithCategory);
-      }
-      
-      // More specific cache invalidation instead of clearing entire lists
-      this.invalidateRelatedCache(postWithCategory);
-      
-      return postWithCategory;
-    }
-    
-    return newPost;
-  }
 
   static async findAll({ limit = 10, offset = 0 } = {}) {
     // Check cache for common queries
@@ -190,65 +154,6 @@ export class Post {
     return await manyOrNone(queryText, [categoryIds, limitPerCategory]);
   }
 
-  static async update(id, data) {
-    const { title, slug, content, categoryId, author, image } = data;
-    const queryText = `
-      UPDATE posts
-      SET title = $1, slug = $2, content = $3, "categoryId" = $4, author = $5, image = $6, "updatedAt" = NOW()
-      WHERE id = $7
-      RETURNING *
-    `;
-    const updatedPost = await one(queryText, [title, slug, content, categoryId, author, image, id]);
-    
-    if (updatedPost) {
-      // Fetch category info
-      const categoryQuery = `SELECT name, slug FROM categories WHERE id = $1`;
-      const category = await one(categoryQuery, [categoryId]);
-      const postWithCategory = {
-        ...updatedPost,
-        category_name: category.name,
-        category_slug: category.slug
-      };
-      
-      // Memory-aware caching
-      const cacheStats = articleCache.getStats();
-      if (cacheStats.activeItems < 900) {
-        articleCache.cachePost(postWithCategory);
-      }
-      
-      // Specific cache invalidation - only clear if post order changed
-      if (title !== updatedPost.title) {
-        // Title change affects search results
-        articleCache.delete(`search:${updatedPost.slug}:1:10`); // If using search caching
-      }
-      
-      return postWithCategory;
-    }
-    
-    return updatedPost;
-  }
-
-  static async delete(id) {
-    // Get the post first to clean up related cache entries
-    const postToDelete = await this.findById(id);
-    
-    const queryText = 'DELETE FROM posts WHERE id = $1';
-    await none(queryText, [id]);
-    
-    // Memory-aware cache cleanup
-    if (postToDelete) {
-      // Delete specific cache entries
-      articleCache.delete(cacheKeys.post(postToDelete.slug));
-      articleCache.delete(cacheKeys.postById(id));
-      
-      // Only clear list cache if this was a recent post (affects ordering)
-      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      if (new Date(postToDelete.createdAt) > twentyFourHoursAgo) {
-        articleCache.delete('posts:list:1:10'); // Clear first page cache
-        articleCache.delete('posts:trending:5'); // Clear trending cache
-      }
-    }
-  }
 
   static async search(query, { limit = 10, offset = 0 } = {}) {
     const searchQuery = `

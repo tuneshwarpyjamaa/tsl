@@ -73,71 +73,9 @@ api.interceptors.response.use(
       console.error('Request Error:', error.message);
     }
 
-    // Don't redirect to login for public endpoints
-    const isPublicEndpoint = error.config?.url?.includes('/posts/optimized') ||
-      error.config?.url?.includes('/categories/featured');
-
-    if (!isPublicEndpoint && typeof window !== 'undefined') {
-      // Only handle auth errors on protected routes
-      if (error.response?.status === 401) {
-        // Clear potentially invalid token
-        setAuthToken(null);
-
-        // Only redirect if we're not on a public page
-        if (!window.location.pathname.startsWith('/login') &&
-          !window.location.pathname.startsWith('/register')) {
-          // Use setTimeout to avoid redirecting during SSR
-          setTimeout(() => {
-            window.location.href = '/login';
-          }, 100);
-        }
-      }
-    }
-
     return Promise.reject(error);
   }
 );
-
-export function setAuthToken(token) {
-  // This function should ONLY run on the client side
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  if (token && typeof token === 'string' && token.length > 10) {
-    // Only set token if it's a valid-looking JWT (basic validation)
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    localStorage.setItem('southline_token', token);
-    console.log('Auth token set successfully');
-  } else {
-    // Clear invalid tokens
-    delete api.defaults.headers.common['Authorization'];
-    localStorage.removeItem('southline_token');
-    console.log('Invalid token cleared');
-  }
-}
-
-// Initialize token ONLY on the client-side where localStorage is available
-if (typeof window !== 'undefined') {
-  try {
-    const savedToken = localStorage.getItem('southline_token');
-    if (savedToken && typeof savedToken === 'string' && savedToken.length > 10) {
-      setAuthToken(savedToken);
-    } else if (savedToken) {
-      // Clear invalid token
-      localStorage.removeItem('southline_token');
-    }
-  } catch (error) {
-    console.warn('Failed to initialize auth token:', error);
-  }
-}
-
-export function getUserRole() {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('user_role');
-  }
-  return null;
-}
 
 export function searchPosts(query) {
   return api.get('/api/posts', { params: { q: query } });

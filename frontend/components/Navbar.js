@@ -1,36 +1,18 @@
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { Menu, X, Facebook, Twitter, Instagram, User } from 'lucide-react';
-import { getUserRole, getCategories } from '../services/api';
+import { Menu, X, Facebook, Twitter, Instagram } from 'lucide-react';
+import { getCategories } from '../services/api';
 
 export default function Navbar() {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState(null);
-  const [userEmail, setUserEmail] = useState(null);
   const [currentDateTime, setCurrentDateTime] = useState({ date: '', time: '' });
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
   const [categories, setCategories] = useState([]);
   const lastScrollY = useRef(0);
 
   useEffect(() => {
-    const checkAuthStatus = () => {
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('southline_token');
-        const role = getUserRole();
-        const email = localStorage.getItem('user_email');
-        setIsAuthenticated(!!token);
-        setUserRole(role);
-        setUserEmail(email);
-      }
-    };
-
-    checkAuthStatus();
-    router.events.on('routeChangeComplete', checkAuthStatus);
-
     const fetchCategories = async () => {
       try {
         const response = await getCategories();
@@ -97,7 +79,6 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      router.events.off('routeChangeComplete', checkAuthStatus);
       if (timer) clearInterval(timer);
       window.removeEventListener('scroll', handleScroll);
     };
@@ -119,18 +100,6 @@ export default function Navbar() {
       }
     };
   }, [isMobileMenuOpen]);
-
-  const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('southline_token');
-      localStorage.removeItem('user_role');
-      localStorage.removeItem('user_email');
-      setIsAuthenticated(false);
-      setUserRole(null);
-      setUserEmail(null);
-      window.location.href = '/';
-    }
-  };
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -217,52 +186,6 @@ export default function Navbar() {
                   <Link href="/" className="whitespace-nowrap">The South Line</Link>
                 </div>
                 <div className="flex items-center space-x-4 relative">
-                  {isAuthenticated ? (
-                    <div className="relative">
-                      <button
-                        onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                        className="p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors"
-                        aria-expanded={isUserMenuOpen}
-                        aria-haspopup="true"
-                      >
-                        <User size={24} className="text-gray-700" />
-                      </button>
-                      {isUserMenuOpen && (
-                        <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
-                          {userEmail && (
-                            <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-200">
-                              {userEmail}
-                            </div>
-                          )}
-                          <Link
-                            href="/account"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onClick={() => setIsUserMenuOpen(false)}
-                          >
-                            My Profile
-                          </Link>
-                          {userRole === 'admin' && (
-                            <Link
-                              href="/admin"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              onClick={() => setIsUserMenuOpen(false)}
-                            >
-                              Admin Dashboard
-                            </Link>
-                          )}
-                          <button
-                            onClick={() => {
-                              handleLogout();
-                              setIsUserMenuOpen(false);
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                          >
-                            Sign Out
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ) : <></>}
                 </div>
               </div>
             </div>
