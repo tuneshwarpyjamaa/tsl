@@ -20,11 +20,20 @@ export default function App({ Component, pageProps }) {
               "@context": "https://schema.org",
               "@type": "WebSite",
               "name": "The South Line",
-              "url": "https://yourdomain.com",
+              "url": "https://thesouthline.in",
               "description": "Your source for latest news and stories",
               "publisher": {
                 "@type": "Organization",
-                "name": "The South Line"
+                "name": "The South Line",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://thesouthline.in/logo.png"
+                }
+              },
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://thesouthline.in/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
               }
             })
           }}

@@ -20,10 +20,13 @@ const Meta = ({
       <meta name="author" content={author} />
       <meta name="robots" content={robots} />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="theme-color" content="#000000" />
       <link rel="canonical" href={canonicalUrl} />
 
       {/* Open Graph Meta Tags */}
       <meta property="og:type" content="website" />
+      <meta property="og:site_name" content="The South Line" />
+      <meta property="og:locale" content="en_US" />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:url" content={canonicalUrl} />
@@ -31,6 +34,8 @@ const Meta = ({
 
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@TheSouthLine" />
+      <meta name="twitter:creator" content="@TheSouthLine" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />

@@ -78,7 +78,7 @@ export default function PostPage() {
 
   // Construct the full URL for sharing
   // In a real production app, this domain should come from an environment variable
-  const postUrl = `https://yourdomain.com/post/${post.slug}`;
+  const postUrl = `https://thesouthline.in/post/${post.slug}`;
 
   // Generate a plain text summary for the meta description
   const createSummary = (htmlContent) => {
@@ -202,14 +202,26 @@ export default function PostPage() {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "NewsArticle",
+              "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": postUrl
+              },
               "headline": post.title,
               "image": [post.image],
               "datePublished": new Date(post.createdAt).toISOString(),
               "dateModified": new Date(post.updatedAt).toISOString(),
-              "author": [{
+              "author": {
                 "@type": "Person",
                 "name": post.author
-              }]
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "The South Line",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://thesouthline.in/logo.png"
+                }
+              }
             })
           }}
         />
