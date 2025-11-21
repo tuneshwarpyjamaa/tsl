@@ -101,7 +101,7 @@ export default function HomePage() {
             {/* Latest News - Main Content */}
             <div className="lg:col-span-8">
               <div className="mb-8">
-                <h2 className="text-2xl sm:text-3xl font-serif font-bold border-b-2 border-black pb-2 mb-4">
+                <h2 className="text-2xl sm:text-3xl font-serif font-bold border-b-2 border-black pb-2 mb-4 text-gray-900">
                   Latest News
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
