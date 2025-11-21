@@ -133,7 +133,7 @@ export default function Navbar() {
             <div className="flex items-center space-x-4">
               <button
                 onClick={toggleDarkMode}
-                className="hover:text-gray-300 transition-colors focus:outline-none"
+                className="hidden hover:text-gray-300 transition-colors focus:outline-none"
                 aria-label="Toggle Dark Mode"
               >
                 {darkMode ? <Sun size={14} /> : <Moon size={14} />}
