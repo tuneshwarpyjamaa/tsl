@@ -7,7 +7,7 @@ const PostImage = ({ src, alt, isFeatured = false }) => {
   const aspectRatioClass = isFeatured ? 'aspect-video' : 'aspect-[4/3]';
 
   return (
-    <div className={`bg-gray-100 dark:bg-gray-800 mb-4 overflow-hidden ${aspectRatioClass} w-full flex items-center justify-center rounded-xl shadow-sm`}>
+    <div className={`bg-gray-100 mb-4 overflow-hidden ${aspectRatioClass} w-full flex items-center justify-center rounded-xl shadow-sm`}>
       {src ? (
         <img
           src={src}
@@ -35,7 +35,7 @@ const PostTitle = ({ title, isFeatured }) => {
   const sizeClass = isFeatured ? 'text-2xl sm:text-3xl md:text-4xl leading-tight' : 'text-xl sm:text-2xl leading-snug';
   return (
     <TitleComponent
-      className={`font-serif font-bold ${sizeClass} mb-2 text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200`}
+      className={`font-serif font-bold ${sizeClass} mb-2 text-gray-900 hover:text-gray-700 transition-colors duration-200`}
       style={{ wordBreak: 'break-word' }}
     >
       {title}
@@ -51,15 +51,15 @@ const PostMeta = ({ author, date, category }) => {
   });
 
   return (
-    <div className="text-xs uppercase font-sans tracking-wider text-gray-500 dark:text-gray-400 flex flex-wrap items-center gap-x-2 gap-y-1">
+    <div className="text-xs uppercase font-sans tracking-wider text-gray-500 flex flex-wrap items-center gap-x-2 gap-y-1">
       {category && (
         <>
-          <span className="font-bold text-black dark:text-white">{category}</span>
-          <span className="text-gray-300 dark:text-gray-600">•</span>
+          <span className="font-bold text-black">{category}</span>
+          <span className="text-gray-300">•</span>
         </>
       )}
       <span>By {author}</span>
-      <span className="text-gray-300 dark:text-gray-600">•</span>
+      <span className="text-gray-300">•</span>
       <time dateTime={date} className="whitespace-nowrap">{formattedDate}</time>
     </div>
   );
@@ -71,7 +71,7 @@ const stripHtml = (html) => (typeof html === 'string' ? html.replace(/<[^>]*>/g,
 const PostSummary = ({ summary }) => {
   const text = stripHtml(summary);
   return (
-    <p className="text-sm sm:text-base font-sans text-gray-600 dark:text-gray-300 my-3 leading-relaxed line-clamp-3">
+    <p className="text-sm sm:text-base font-sans text-gray-600 my-3 leading-relaxed line-clamp-3">
       {text}
     </p>
   );
@@ -92,7 +92,7 @@ export default function PostCard({ post, variant = 'default' }) {
                 </div>
                 <PostTitle title={post.title} isFeatured={true} />
                 <PostSummary summary={summary} />
-                <span className="inline-block mt-4 text-sm font-bold text-black dark:text-white border-b-2 border-black dark:border-white pb-0.5 hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-600 dark:hover:border-gray-300 transition-all">
+                <span className="inline-block mt-4 text-sm font-bold text-black border-b-2 border-black pb-0.5 hover:text-gray-600 hover:border-gray-600 transition-all">
                   Read Story
                 </span>
               </div>
@@ -107,13 +107,13 @@ export default function PostCard({ post, variant = 'default' }) {
     case 'side':
       return (
         <article className="group">
-          <Link href={`/post/${post.slug}`} className="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-2 p-2 rounded-xl transition-colors duration-200">
+          <Link href={`/post/${post.slug}`} className="block hover:bg-gray-50 -mx-2 p-2 rounded-xl transition-colors duration-200">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="w-full sm:w-1/3 flex-shrink-0">
                 <PostImage src={post.image} alt={post.title} />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-serif font-bold text-lg leading-snug mb-2 text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+                <h3 className="font-serif font-bold text-lg leading-snug mb-2 text-gray-900 group-hover:text-gray-700 transition-colors">
                   {post.title}
                 </h3>
                 <PostMeta author={post.author} date={post.createdAt} category={post.categoryId?.name} />
@@ -125,7 +125,7 @@ export default function PostCard({ post, variant = 'default' }) {
 
     default:
       return (
-        <article className="group h-full bg-white dark:bg-gray-900 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg border border-transparent hover:border-gray-100 dark:hover:border-gray-800">
+        <article className="group h-full bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg border border-transparent hover:border-gray-100">
           <Link href={`/post/${post.slug}`} className="block h-full">
             <div className="h-full flex flex-col p-4">
               <div className="mb-4 -mx-4 -mt-4">
@@ -138,7 +138,7 @@ export default function PostCard({ post, variant = 'default' }) {
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                       <span className="text-gray-400">No Image</span>
                     </div>
                   )}

@@ -10,19 +10,9 @@ export default function Navbar() {
   const [currentDateTime, setCurrentDateTime] = useState({ date: '', time: '' });
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
   const [categories, setCategories] = useState([]);
-  const [darkMode, setDarkMode] = useState(false);
   const lastScrollY = useRef(0);
 
   useEffect(() => {
-    // Check for saved theme
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-    } else {
-      setDarkMode(false);
-      document.documentElement.classList.remove('dark');
-    }
-
     const fetchCategories = async () => {
       try {
         const response = await getCategories();
@@ -77,27 +67,6 @@ export default function Navbar() {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [router.events]);
-
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => { document.body.style.overflow = 'auto'; };
-  }, [isMobileMenuOpen]);
-
-  const toggleDarkMode = () => {
-    if (darkMode) {
-      document.documentElement.classList.remove('dark');
-      localStorage.theme = 'light';
-      setDarkMode(false);
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.theme = 'dark';
-      setDarkMode(true);
-    }
-  };
 
   const navLinks = [
     ...categories.map(cat => ({ name: cat.name, href: `/category/${cat.slug}` }))
@@ -175,13 +144,7 @@ export default function Navbar() {
               </nav>
 
               {/* Theme Toggle Button */}
-              <button
-                onClick={toggleDarkMode}
-                className="hidden md:block p-1 text-gray-300 hover:text-white transition-colors"
-                aria-label="Toggle dark mode"
-              >
-                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
+
 
               {/* Search Icon (Desktop) */}
               <div className="hidden md:block w-48">
@@ -247,19 +210,12 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="pt-6 border-t border-gray-200 dark:border-gray-800 mt-auto">
+          <div className="pt-6 border-t border-gray-200 mt-auto">
             <div className="flex justify-between items-center">
-              <button
-                onClick={toggleDarkMode}
-                className="p-1 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
-                aria-label="Toggle dark mode"
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
               <div className="flex space-x-8">
-                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"><Facebook size={24} /></a>
-                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"><Twitter size={24} /></a>
-                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"><Instagram size={24} /></a>
+                <a href="#" className="text-gray-600 hover:text-black"><Facebook size={24} /></a>
+                <a href="#" className="text-gray-600 hover:text-black"><Twitter size={24} /></a>
+                <a href="#" className="text-gray-600 hover:text-black"><Instagram size={24} /></a>
               </div>
             </div>
           </div>
