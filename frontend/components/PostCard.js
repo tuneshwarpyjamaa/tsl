@@ -1,30 +1,32 @@
 import Link from 'next/link';
+import Image from 'next/image';
+import { useState } from 'react';
 
 const PostImage = ({ src, alt, isFeatured = false }) => {
-  const placeholderSvg = `data:image/svg+xml,%3Csvg width='400' height='300' viewBox='0 0 400 300' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='400' height='300' fill='%23F3F4F6'/%3E%3Cpath d='M100 125C100 111.193 111.193 100 125 100H275C288.807 100 300 111.193 300 125V175C300 188.807 288.807 200 275 200H125C111.193 200 100 188.807 100 175V125Z' fill='%E2%80%A6'/%3E%3Ccircle cx='125' cy='125' r='25' fill='%E2%80%A6'/%3E%3Cpath d='M100 175L150 125L200 175L250 125L300 175' stroke='%E2%80%A6' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E`;
-
   // Using a consistent aspect ratio for side/list views prevents squashing
   const aspectRatioClass = isFeatured ? 'aspect-video' : 'aspect-[4/3]';
+  const [error, setError] = useState(false);
 
   return (
-    <div className={`bg-gray-100 mb-4 overflow-hidden ${aspectRatioClass} w-full flex items-center justify-center rounded-xl shadow-sm`}>
-      {src ? (
-        <img
+    <div className={`bg-gray-100 mb-4 overflow-hidden ${aspectRatioClass} w-full flex items-center justify-center rounded-xl shadow-sm relative`}>
+      {src && !error ? (
+        <Image
           src={src}
-          alt={alt}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-          loading={isFeatured ? 'eager' : 'lazy'}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = placeholderSvg;
-          }}
+          alt={alt || "Post image"}
+          fill
+          className="object-cover transition-transform duration-500 hover:scale-105"
+          sizes={isFeatured ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"}
+          priority={isFeatured}
+          onError={() => setError(true)}
         />
       ) : (
-        <img
-          src={placeholderSvg}
-          alt="No image available"
-          className="w-full h-full object-cover opacity-30"
-        />
+        <div className="w-full h-full flex items-center justify-center text-gray-400">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+        </div>
       )}
     </div>
   );
@@ -80,6 +82,9 @@ const PostSummary = ({ summary }) => {
 export default function PostCard({ post, variant = 'default' }) {
   const summary = post.summary;
 
+  // We need to handle the image fallback logic at the usage site as well if we want to pass a state down,
+  // but simpler to just use the new self-contained PostImage component everywhere.
+
   switch (variant) {
     case 'featured':
       return (
@@ -130,18 +135,7 @@ export default function PostCard({ post, variant = 'default' }) {
             <div className="h-full flex flex-col p-4">
               <div className="mb-4 -mx-4 -mt-4">
                 <div className="aspect-[4/3] overflow-hidden relative">
-                  {post.image ? (
-                    <img
-                      src={post.image}
-                      alt={post.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                      <span className="text-gray-400">No Image</span>
-                    </div>
-                  )}
+                   <PostImage src={post.image} alt={post.title} />
                 </div>
               </div>
               <div className="flex-1 flex flex-col">

@@ -1,6 +1,7 @@
 import api from '@/services/api';
 import Meta from '@/components/Meta';
 import Head from 'next/head';
+import Image from 'next/image';
 import { Facebook, Twitter, Linkedin } from 'lucide-react';
 import PostCard from '@/components/PostCard';
 import { useState, useEffect } from 'react';
@@ -253,8 +254,15 @@ export default function PostPage() {
 
           {/* Post Image */}
           {post.image && (
-            <div className="mb-8">
-              <img src={post.image} alt={post.title} className="w-full h-auto" />
+            <div className="mb-8 relative w-full aspect-video">
+              <Image
+                src={post.image}
+                alt={post.title}
+                fill
+                priority
+                className="object-cover rounded-lg"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
+              />
             </div>
           )}
 
