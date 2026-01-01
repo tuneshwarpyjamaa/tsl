@@ -2,107 +2,118 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 
-const PostImage = ({ src, alt, isFeatured = false }) => {
-  // Using a consistent aspect ratio for side/list views prevents squashing
-  const aspectRatioClass = isFeatured ? 'aspect-video' : 'aspect-[4/3]';
+const calculateReadTime = (text) => {
+  const wordsPerMinute = 200;
+  const wordCount = text ? text.split(/\s+/).length : 0;
+  const readTime = Math.ceil(wordCount / wordsPerMinute);
+  return `${readTime} min read`;
+};
+
+const PostImage = ({ src, alt, isFeatured = false, isList = false, isSide = false }) => {
   const [error, setError] = useState(false);
 
+  let containerClass = "bg-gray-100 overflow-hidden relative";
+
+  if (isFeatured) {
+    containerClass += " aspect-video w-full rounded-xl mb-6";
+  } else if (isList) {
+    // List view: fixed square or rectangular thumbnail on the right
+    containerClass += " w-24 h-24 sm:w-40 sm:h-28 flex-shrink-0 rounded-lg";
+  } else if (isSide) {
+     containerClass += " w-16 h-16 flex-shrink-0 rounded-md"; // Smaller for sidebar
+  } else {
+    // Default fallback
+    containerClass += " aspect-[4/3] w-full rounded-lg";
+  }
+
   return (
-    <div className={`bg-gray-100 mb-4 overflow-hidden ${aspectRatioClass} w-full flex items-center justify-center rounded-xl shadow-sm relative`}>
+    <div className={containerClass}>
       {src && !error ? (
         <Image
           src={src}
           alt={alt || "Post image"}
           fill
           className="object-cover transition-transform duration-500 hover:scale-105"
-          sizes={isFeatured ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"}
+          sizes={isFeatured ? "(max-width: 768px) 100vw, 800px" : "200px"}
           priority={isFeatured}
           onError={() => setError(true)}
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-gray-400">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <polyline points="21 15 16 10 5 21" />
-          </svg>
+        <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
+           {/* Simple placeholder icon */}
+           <div className="w-6 h-6 border-2 border-gray-300 rounded-sm"></div>
         </div>
       )}
     </div>
   );
 };
 
-const PostTitle = ({ title, isFeatured }) => {
-  const TitleComponent = isFeatured ? 'h1' : 'h2';
-  const sizeClass = isFeatured ? 'text-2xl sm:text-3xl md:text-4xl leading-tight' : 'text-xl sm:text-2xl leading-snug';
-  return (
-    <TitleComponent
-      className={`font-serif font-bold ${sizeClass} mb-2 text-gray-900 hover:text-gray-700 transition-colors duration-200`}
-      style={{ wordBreak: 'break-word' }}
-    >
-      {title}
-    </TitleComponent>
-  );
-};
-
-const PostMeta = ({ author, date, category }) => {
+const PostMeta = ({ author, date, category, readTime }) => {
   const formattedDate = new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
     month: 'short',
     day: 'numeric'
   });
 
   return (
-    <div className="text-xs uppercase font-sans tracking-wider text-gray-500 flex flex-wrap items-center gap-x-2 gap-y-1">
-      {category && (
+    <div className="flex items-center text-xs sm:text-sm text-gray-500 space-x-2 font-sans mb-2">
+      <div className="flex items-center space-x-2">
+        {/* Author Avatar (Mock) */}
+        <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">
+           {author ? author[0].toUpperCase() : 'A'}
+        </div>
+        <span className="font-medium text-gray-900">{author}</span>
+      </div>
+      <span>·</span>
+      <span>{formattedDate}</span>
+      {readTime && (
         <>
-          <span className="font-bold text-black">{category}</span>
-          <span className="text-gray-300">•</span>
+          <span>·</span>
+          <span>{readTime}</span>
         </>
       )}
-      <span>By {author}</span>
-      <span className="text-gray-300">•</span>
-      <time dateTime={date} className="whitespace-nowrap">{formattedDate}</time>
+      {category && (
+         <>
+           <span>·</span>
+           <span className="px-2 py-0.5 bg-gray-100 rounded-full text-xs font-medium text-gray-600">
+             {category}
+           </span>
+         </>
+      )}
     </div>
   );
 };
 
-// Ensure HTML tags are not displayed in summaries
 const stripHtml = (html) => (typeof html === 'string' ? html.replace(/<[^>]*>/g, '') : '');
-
-const PostSummary = ({ summary }) => {
-  const text = stripHtml(summary);
-  return (
-    <p className="text-sm sm:text-base font-sans text-gray-600 my-3 leading-relaxed line-clamp-3">
-      {text}
-    </p>
-  );
-};
 
 export default function PostCard({ post, variant = 'default' }) {
   const summary = post.summary;
-
-  // We need to handle the image fallback logic at the usage site as well if we want to pass a state down,
-  // but simpler to just use the new self-contained PostImage component everywhere.
+  const readTime = calculateReadTime(post.content || summary);
+  const plainSummary = stripHtml(summary);
 
   switch (variant) {
     case 'featured':
       return (
         <article className="group">
           <Link href={`/post/${post.slug}`} className="block">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
-              <div className="order-2 lg:order-1">
-                <div className="mb-2">
-                  <PostMeta author={post.author} date={post.createdAt} category={post.categoryId?.name} />
+            <div className="flex flex-col">
+              <PostImage src={post.image} alt={post.title} isFeatured={true} />
+
+              <div className="max-w-3xl">
+                <PostMeta
+                  author={post.author}
+                  date={post.createdAt}
+                  category={post.categoryId?.name}
+                  readTime={readTime}
+                />
+                <h2 className="font-serif font-bold text-3xl sm:text-4xl leading-tight mb-3 text-gray-900 group-hover:text-gray-700 transition-colors">
+                  {post.title}
+                </h2>
+                <p className="font-serif text-lg text-gray-600 leading-relaxed mb-4 line-clamp-3">
+                  {plainSummary}
+                </p>
+                <div className="flex items-center text-sm font-medium text-gray-900 underline decoration-gray-300 underline-offset-4 group-hover:decoration-gray-900 transition-all">
+                  Read full story
                 </div>
-                <PostTitle title={post.title} isFeatured={true} />
-                <PostSummary summary={summary} />
-                <span className="inline-block mt-4 text-sm font-bold text-black border-b-2 border-black pb-0.5 hover:text-gray-600 hover:border-gray-600 transition-all">
-                  Read Story
-                </span>
-              </div>
-              <div className="order-1 lg:order-2">
-                <PostImage src={post.image} alt={post.title} isFeatured={true} />
               </div>
             </div>
           </Link>
@@ -112,39 +123,61 @@ export default function PostCard({ post, variant = 'default' }) {
     case 'side':
       return (
         <article className="group">
-          <Link href={`/post/${post.slug}`} className="block hover:bg-gray-50 -mx-2 p-2 rounded-xl transition-colors duration-200">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="w-full sm:w-1/3 flex-shrink-0">
-                <PostImage src={post.image} alt={post.title} />
-              </div>
+          <Link href={`/post/${post.slug}`} className="block">
+            <div className="flex items-start gap-4">
               <div className="flex-1 min-w-0">
-                <h3 className="font-serif font-bold text-lg leading-snug mb-2 text-gray-900 group-hover:text-gray-700 transition-colors">
+                <div className="flex items-center space-x-2 mb-1.5">
+                   <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center text-[8px] font-bold text-gray-500">
+                     {post.author ? post.author[0] : 'T'}
+                   </div>
+                   <span className="text-xs font-medium text-gray-900 truncate">{post.author}</span>
+                </div>
+                <h3 className="font-serif font-bold text-base leading-snug text-gray-900 group-hover:text-gray-700 transition-colors mb-1">
                   {post.title}
                 </h3>
-                <PostMeta author={post.author} date={post.createdAt} category={post.categoryId?.name} />
+                <time className="text-xs text-gray-500">
+                   {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </time>
               </div>
+              {/* Optional: Show image in sidebar or not. Medium usually doesn't for side lists, but let's keep it small */}
+              {post.image && (
+                 <PostImage src={post.image} alt={post.title} isSide={true} />
+              )}
             </div>
           </Link>
         </article>
       );
 
+    // Default is now the "List View" (Medium style row)
     default:
       return (
-        <article className="group h-full bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg border border-transparent hover:border-gray-100">
-          <Link href={`/post/${post.slug}`} className="block h-full">
-            <div className="h-full flex flex-col p-4">
-              <div className="mb-4 -mx-4 -mt-4">
-                <div className="aspect-[4/3] overflow-hidden relative">
-                   <PostImage src={post.image} alt={post.title} />
+        <article className="group">
+          <Link href={`/post/${post.slug}`} className="block">
+            <div className="flex items-start justify-between gap-6 sm:gap-8">
+              <div className="flex-1 min-w-0 py-1">
+                <PostMeta
+                  author={post.author}
+                  date={post.createdAt}
+                  category={post.categoryId?.name}
+                  readTime={readTime}
+                />
+
+                <h2 className="font-serif font-bold text-xl sm:text-2xl leading-snug mb-2 text-gray-900 group-hover:text-gray-700 transition-colors">
+                  {post.title}
+                </h2>
+
+                <p className="font-serif text-base text-gray-500 leading-relaxed line-clamp-2 sm:line-clamp-3 hidden sm:block">
+                  {plainSummary}
+                </p>
+
+                <div className="mt-3 sm:hidden text-xs text-gray-500 font-medium">
+                  Read more
                 </div>
               </div>
-              <div className="flex-1 flex flex-col">
-                <div className="mb-2">
-                  <PostMeta author={post.author} date={post.createdAt} category={post.categoryId?.name} />
-                </div>
-                <PostTitle title={post.title} />
-                <PostSummary summary={summary} />
-              </div>
+
+              {post.image && (
+                <PostImage src={post.image} alt={post.title} isList={true} />
+              )}
             </div>
           </Link>
         </article>
