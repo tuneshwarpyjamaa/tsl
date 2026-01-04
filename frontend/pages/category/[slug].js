@@ -63,7 +63,7 @@ export default function CategoryPage() {
 
   if (data.loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         <div className="text-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading category...</p>
@@ -112,7 +112,7 @@ export default function CategoryPage() {
           }}
         />
       </Head>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         <h1 className="text-2xl md:text-3xl font-bold border-b pb-4 mb-8">{category.name}</h1>
         {posts.length === 0 ? (
           <div>No posts in this category yet.</div>

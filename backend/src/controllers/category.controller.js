@@ -26,10 +26,9 @@ export async function getPostsByCategory(req, res) {
 
 export async function getFeaturedCategories(req, res) {
   try {
-    // Get specific featured categories: Business and Culture
-    const business = await Category.findBySlug('business');
-    const culture = await Category.findBySlug('culture');
-    const featuredCategories = [business, culture].filter(Boolean);
+    // Get the News category
+    const news = await Category.findBySlug('news');
+    const featuredCategories = [news].filter(Boolean);
 
     const categoryMap = new Map(featuredCategories.map(c => [c.id, c]));
     const categoryIds = Array.from(categoryMap.keys());

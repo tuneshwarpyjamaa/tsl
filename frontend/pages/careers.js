@@ -9,7 +9,7 @@ export default function Careers() {
                 <meta name="description" content="Join our team at The South Line. We are looking for passionate individuals to help us tell stories that matter." />
             </Head>
 
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-20">
                     <h1 className="text-4xl md:text-6xl font-serif font-bold mb-8 text-gray-900 dark:text-white">
                         Join Our Team

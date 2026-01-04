@@ -14,7 +14,7 @@ export default function SearchResults() {
   useEffect(() => {
     const fetchSearchResults = async () => {
       if (!q) return;
-      
+
       setLoading(true);
       try {
         const response = await searchPosts(q);
@@ -38,13 +38,13 @@ export default function SearchResults() {
         <title>Search Results for "{q}" | The South Line</title>
         <meta name="description" content={`Search results for "${q}"`} />
       </Head>
-      
-      <main className="flex-1 container mx-auto px-4 py-8 mt-16">
+
+      <main className="flex-1 container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-2xl md:text-3xl font-bold mb-6">
             Search Results for "{q}"
           </h1>
-          
+
           {loading ? (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>

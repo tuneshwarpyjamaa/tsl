@@ -2,7 +2,7 @@ import Head from 'next/head';
 
 export default function PrivacyPage() {
   return (
-    <div className="container mx-auto px-4 py-12 bg-white text-black">
+    <div className="container mx-auto px-4 bg-white text-black">
       <Head>
         <title>Privacy Policy - The South Line</title>
         <meta name="description" content="Privacy Policy for The South Line, compliant with Indian IT Act and DPDP Act." />

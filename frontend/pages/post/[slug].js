@@ -59,7 +59,7 @@ export default function PostPage() {
 
   if (data.loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading article...</p>
@@ -227,7 +227,7 @@ export default function PostPage() {
         />
       </Head>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         <article className="max-w-3xl mx-auto">
           {/* Post Header */}
           <header className="mb-8">

@@ -2,7 +2,7 @@ import Head from 'next/head';
 
 export default function TermsPage() {
   return (
-    <div className="container mx-auto px-4 py-12 bg-white text-black">
+    <div className="container mx-auto px-4 bg-white text-black">
       <Head>
         <title>Terms of Service - The South Line</title>
         <meta name="description" content="Terms of Service for The South Line, governed by Indian laws." />

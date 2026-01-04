@@ -26,7 +26,7 @@ export default function ContactPage() {
         description="Get in touch with The South Line. We welcome your feedback, inquiries, and story tips."
         url="https://yourdomain.com/contact"
       />
-      <div className="container mx-auto px-4 py-12 bg-white text-black">
+      <div className="container mx-auto px-4 bg-white text-black">
         <main className="max-w-4xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-serif font-bold border-b-4 border-black pb-4 mb-8">
             Contact Us

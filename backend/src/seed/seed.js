@@ -13,9 +13,7 @@ async function run() {
   try {
 
     const categoriesData = [
-      { name: 'Core Analysis', slug: 'core-analysis' },
-      { name: 'The Long View', slug: 'the-long-view' },
-      { name: 'The Archive', slug: 'the-archive' }
+      { name: 'News', slug: 'news' }
     ];
 
     // Delete existing categories not in the new list
@@ -43,37 +41,35 @@ async function run() {
     }
     console.log('Seeded categories');
 
-    const coreAnalysis = await Category.findBySlug('core-analysis');
-    const longView = await Category.findBySlug('the-long-view');
-    const archive = await Category.findBySlug('the-archive');
+    const news = await Category.findBySlug('news');
 
     const postsData = [
       {
-        title: 'Welcome to Core Analysis',
-        slug: 'welcome-to-core-analysis',
-        content: 'Direct, strong analysis dissecting complex policies, geopolitics, and economies. For long-term perspectives, check out The Long View on Trends. Also, explore the Archive of Reference Materials for background information.',
-        categoryId: coreAnalysis?.id,
+        title: 'Welcome to Our News Platform',
+        slug: 'welcome-to-our-news-platform',
+        content: 'Stay updated with the latest news and developments. We bring you comprehensive coverage of current events, analysis, and insights.',
+        categoryId: news?.id,
         author: 'Admin'
       },
       {
-        title: 'The Long View on Trends',
-        slug: 'the-long-view-on-trends',
-        content: 'Non-reactive focus on long-term trends, future policy implications, and emerging technology shifts. This complements the Welcome to Core Analysis approach. See Additional Core Analysis for more detailed breakdowns.',
-        categoryId: longView?.id,
+        title: 'Breaking News Updates',
+        slug: 'breaking-news-updates',
+        content: 'Get real-time updates on breaking news stories from around the world. Our team works around the clock to bring you the most important developments.',
+        categoryId: news?.id,
         author: 'Admin'
       },
       {
-        title: 'Archive of Reference Materials',
-        slug: 'archive-of-reference-materials',
-        content: 'Curated collection of background papers, reading lists, and research materials. Useful for understanding the context in Welcome to Core Analysis and The Long View on Trends.',
-        categoryId: archive?.id,
+        title: 'News Analysis and Commentary',
+        slug: 'news-analysis-and-commentary',
+        content: 'In-depth analysis and expert commentary on the most significant news stories. Understanding the context behind the headlines.',
+        categoryId: news?.id,
         author: 'Admin'
       },
       {
-        title: 'Additional Core Analysis',
-        slug: 'additional-core-analysis',
-        content: 'Further dissection of economic policies and geopolitical strategies. Builds on the foundation from Welcome to Core Analysis. For archival references, visit Archive of Reference Materials.',
-        categoryId: coreAnalysis?.id,
+        title: 'Latest News Roundup',
+        slug: 'latest-news-roundup',
+        content: 'A comprehensive roundup of the latest news stories. Stay informed with our curated selection of the most important updates.',
+        categoryId: news?.id,
         author: 'Admin'
       }
     ];

@@ -81,6 +81,118 @@ export default function PostCard({ post, variant = 'default' }) {
   const summary = post.summary;
 
   switch (variant) {
+    case 'hero':
+      // Large featured article for left side of hero section
+      return (
+        <article className="group h-full">
+          <Link href={`/post/${post.slug}`} className="block h-full">
+            <div className="h-full flex flex-col">
+              <div className="relative overflow-hidden rounded-lg mb-4">
+                <div className="aspect-[16/10] overflow-hidden">
+                  {post.image ? (
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="eager"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400">No Image</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex-1">
+                <h2 className="font-serif font-bold text-2xl sm:text-3xl lg:text-4xl leading-tight mb-3 text-gray-900 group-hover:text-gray-700 transition-colors">
+                  {post.title}
+                </h2>
+                <p className="text-sm sm:text-base text-gray-600 mb-3 leading-relaxed line-clamp-3">
+                  {stripHtml(summary)}
+                </p>
+              </div>
+            </div>
+          </Link>
+        </article>
+      );
+
+    case 'secondary':
+      // Stacked articles for right side of hero section
+      return (
+        <article className="group">
+          <Link href={`/post/${post.slug}`} className="block">
+            <div className="flex gap-4">
+              <div className="relative w-32 sm:w-40 flex-shrink-0">
+                <div className="aspect-square overflow-hidden rounded-lg">
+                  {post.image ? (
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400 text-xs">No Image</span>
+                    </div>
+                  )}
+                </div>
+                {/* Badge overlay */}
+                <div className="absolute bottom-2 left-2 bg-red-600 text-white p-1.5 rounded">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-serif font-bold text-lg sm:text-xl leading-tight mb-2 text-gray-900 group-hover:text-gray-700 transition-colors line-clamp-3">
+                  {post.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
+                  {stripHtml(summary)}
+                </p>
+              </div>
+            </div>
+          </Link>
+        </article>
+      );
+
+    case 'grid':
+      // 3-column grid cards
+      return (
+        <article className="group h-full">
+          <Link href={`/post/${post.slug}`} className="block h-full">
+            <div className="h-full flex flex-col">
+              <div className="relative overflow-hidden rounded-lg mb-3">
+                <div className="aspect-[4/3] overflow-hidden">
+                  {post.image ? (
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400">No Image</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-serif font-bold text-lg sm:text-xl leading-tight mb-2 text-gray-900 group-hover:text-gray-700 transition-colors line-clamp-3">
+                  {post.title}
+                </h3>
+                <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                  {stripHtml(summary)}
+                </p>
+              </div>
+            </div>
+          </Link>
+        </article>
+      );
+
     case 'featured':
       return (
         <article className="group">
