@@ -204,17 +204,6 @@ export default function PostPage() {
         />
       </Head>
 
-<<<<<<< HEAD
-      <div className="container mx-auto px-4">
-        <article className="max-w-3xl mx-auto">
-          {/* Post Header */}
-          <header className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">{post.title}</h1>
-            <div className="text-sm uppercase font-sans tracking-wider">
-              By {post.author} &bull; {new Date(post.createdAt).toLocaleDateString()}
-            </div>
-          </header>
-=======
       <div className="bg-white min-h-screen">
         <article>
           {/* Article Header */}
@@ -222,25 +211,24 @@ export default function PostPage() {
             <h1 className="text-3xl md:text-5xl font-serif font-bold text-gray-900 mb-6 leading-tight">
               {post.title}
             </h1>
->>>>>>> e65eaf1719096ce87fbcabe4c2e714aa612d3010
 
             <div className="flex items-center justify-between py-6 border-b border-gray-100 mb-8">
               <div className="flex items-center space-x-3">
-                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">
-                    {post.author ? post.author[0] : 'T'}
-                 </div>
-                 <div className="flex flex-col">
-                   <span className="text-sm font-medium text-gray-900">{post.author}</span>
-                   <div className="text-xs text-gray-500 flex items-center space-x-2">
-                     <span>{readTime}</span>
-                     <span>·</span>
-                     <span>{new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                   </div>
-                 </div>
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">
+                  {post.author ? post.author[0] : 'T'}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-900">{post.author}</span>
+                  <div className="text-xs text-gray-500 flex items-center space-x-2">
+                    <span>{readTime}</span>
+                    <span>·</span>
+                    <span>{new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center space-x-4 text-gray-500">
-                 <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">
+                <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">
                   <Twitter size={20} />
                 </a>
                 <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">
